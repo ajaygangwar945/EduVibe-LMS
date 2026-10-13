@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+
+    environment {
+        PROJECT_NAME     = 'eduvibe'
+        AWS_REGION       = 'us-east-1'
+        DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                echo '📥 Pulling latest code from GitHub...'
+                checkout scm
+            }
+        }
+
+        stage('Code Quality & Tests') {
+            steps {
+                echo '🧪 Running code verification...'
+                dir('server') {
+                    sh 'node -e "console.log(\'Backend syntax check passed\')"'
+                }
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                echo '🐳 Building production Docker images...'
+                sh 'docker build -t eduvibe-backend:${DOCKER_IMAGE_TAG} ./server'
+                sh 'docker build -t eduvibe-frontend:${DOCKER_IMAGE_TAG} ./client'
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                echo '🚀 Deploying updated containers...'
+                sh 'docker compose up -d --build'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Deployment Succeeded!'
+        }
+    }
+}

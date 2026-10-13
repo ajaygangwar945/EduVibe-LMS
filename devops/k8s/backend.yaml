@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: uploads-pvc
+  labels:
+    app: eduvibe-backend
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  labels:
+    app: eduvibe-backend
+spec:
+  replicas: 2 # High Availability (2 copies of backend API running)
+  selector:
+    matchLabels:
+      app: eduvibe-backend
+  template:
+    metadata:
+      labels:
+        app: eduvibe-backend
+    spec:
+      containers:
+        - name: backend
+          image: eduvibe-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            - name: PORT
+              value: "5000"
+            - name: MONGO_URI
+              value: "mongodb://mongo-service:27017/eduvibe"
+            - name: JWT_SECRET
+              value: "eduvibe_k8s_jwt_secret_2026"
+            - name: ADMIN_EMAIL
+              value: "admin@eduvibe.com"
+            - name: ADMIN_PASSWORD
+              value: "admin123"
+          volumeMounts:
+            - name: uploads-storage
+              mountPath: /app/uploads
+      volumes:
+        - name: uploads-storage
+          persistentVolumeClaim:
+            claimName: uploads-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  labels:
+    app: eduvibe-backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: 5000
+  selector:
+    app: eduvibe-backend
