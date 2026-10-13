@@ -131,6 +131,22 @@ You can run EduVibe locally using **Docker (Recommended)** or **Manual Node.js**
 
 ---
 
+### ⚡ Quick Command Cheat Sheet (Start & Stop)
+
+| Action | Command | What It Does |
+| :--- | :--- | :--- |
+| 🚀 **Start Everything** | `docker compose --profile monitoring up -d` | Starts all 6 containers (App + MongoDB + Prometheus + Grafana) |
+| 🌐 **Start App Only** | `docker compose up -d` | Starts 4 containers (React Frontend, Node.js API, MongoDB, Mongo Express) |
+| 🛑 **Stop Everything** | `docker compose --profile monitoring down` | Cleanly stops and removes all containers (Data preserved in volumes) |
+| ⏹️ **Stop App Only** | `docker compose down` | Cleanly stops and removes core app containers |
+| ⏸️ **Pause Containers** | `docker compose --profile monitoring stop` | Pauses running containers without removing them |
+| ▶️ **Resume Containers** | `docker compose --profile monitoring start` | Instantly resumes paused containers |
+| 🔄 **Rebuild & Start** | `docker compose --profile monitoring up -d --build` | Rebuilds source code changes and starts all containers |
+| 📋 **Check Status** | `docker ps` | Displays all active containers, health status, and ports |
+| 📜 **View Logs** | `docker compose logs -f` | Streams live output from all services for debugging |
+
+---
+
 ### Option A: Run with Docker (Recommended — All Services in 1 Command)
 
 Docker automatically builds and runs the React Frontend, Node.js Backend, MongoDB Database, Mongo Express GUI, and optionally Prometheus & Grafana.
