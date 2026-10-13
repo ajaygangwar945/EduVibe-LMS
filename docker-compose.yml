@@ -1,3 +1,5 @@
+name: eduvibe
+
 services:
   # ---------------------------------------------------------------------------
   # 1. MongoDB Database Container
