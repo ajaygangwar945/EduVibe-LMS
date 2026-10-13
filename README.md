@@ -1,5 +1,6 @@
 # 🎓 EduVibe - Next-Gen Academic & Learning Management Portal
 
+[![Vercel](https://img.shields.io/badge/Vercel-Live%20Frontend-black?logo=vercel)](https://edu-vibe-lms.vercel.app/)
 [![AWS Cloud](https://img.shields.io/badge/AWS-EC2%20%7C%20S3%20%7C%20CloudFront-orange?logo=amazon-aws)](https://aws.amazon.com/)
 [![Terraform](https://img.shields.io/badge/IaC-Terraform-purple?logo=terraform)](https://www.terraform.io/)
 [![Docker](https://img.shields.io/badge/Docker-Containers-blue?logo=docker)](https://www.docker.com/)
@@ -19,7 +20,7 @@ The entire infrastructure is automated using **Terraform (Infrastructure as Code
 ---
 
 ## 🌐 Live Cloud Deployment Architecture
-- 🔗 **Web Portal (Vercel)**: `https://<your-vercel-domain>.vercel.app`
+- 🚀 **Live Web Portal (Vercel)**: [https://edu-vibe-lms.vercel.app/](https://edu-vibe-lms.vercel.app/)
 - ⚡ **Backend API**: `http://<YOUR_AWS_ELASTIC_IP>:5000`
 - 🍃 **MongoDB Visual Cloud Explorer**: `http://<YOUR_AWS_ELASTIC_IP>:8081`
 - 📊 **Prometheus Metrics**: `http://<YOUR_AWS_ELASTIC_IP>:9090`
@@ -103,8 +104,8 @@ The entire infrastructure is automated using **Terraform (Infrastructure as Code
 
 | Portal | URL | Username / Email | Password |
 |---|---|---|---|
-| **System Admin** | `http://localhost:3005` or `http://<YOUR_AWS_ELASTIC_IP>:3005` | `admin@eduvibe.com` | `admin123` *(Configurable via ADMIN_PASSWORD)* |
-| **Sample Faculty** | `http://localhost:3005` or `http://<YOUR_AWS_ELASTIC_IP>:3005` | `robert.smith@eduvibe.com` | `password123` |
+| **System Admin** | [https://edu-vibe-lms.vercel.app/](https://edu-vibe-lms.vercel.app/) or `http://localhost:3005` | `admin@eduvibe.com` | `admin123` *(Configurable via ADMIN_PASSWORD)* |
+| **Sample Faculty** | [https://edu-vibe-lms.vercel.app/](https://edu-vibe-lms.vercel.app/) or `http://localhost:3005` | `robert.smith@eduvibe.com` | `password123` |
 | **Mongo Express** | `http://localhost:8081` or `http://<YOUR_AWS_ELASTIC_IP>:8081` | `admin` | *(Configured via MONGO_EXPRESS_PASSWORD)* |
 | **Grafana Analytics** | `http://localhost:3001` or `http://<YOUR_AWS_ELASTIC_IP>:3001` | `admin` | *(Configured via GRAFANA_ADMIN_PASSWORD)* |
 
