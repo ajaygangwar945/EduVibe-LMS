@@ -90,6 +90,39 @@ services:
     networks:
       - eduvibe-network
 
+  # ---------------------------------------------------------------------------
+  # 5. Prometheus Metrics Scraper (Profile: monitoring)
+  # ---------------------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: eduvibe-prometheus
+    restart: always
+    profiles: ["monitoring", "all"]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./devops/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - eduvibe-network
+
+  # ---------------------------------------------------------------------------
+  # 6. Grafana Real-Time Analytics Dashboard (Profile: monitoring)
+  # ---------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: eduvibe-grafana
+    restart: always
+    profiles: ["monitoring", "all"]
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-EduVibeGrafana2026!}
+    depends_on:
+      - prometheus
+    networks:
+      - eduvibe-network
+
 # -----------------------------------------------------------------------------
 # Persistent Volumes (Data never gets lost on restart)
 # -----------------------------------------------------------------------------

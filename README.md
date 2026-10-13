@@ -125,20 +125,97 @@ EduVibe is engineered with enterprise security best practices:
 
 ---
 
-## 🚀 Quick Start (Local Run with Docker)
+## 💻 How to Run the Project Locally (Step-by-Step)
 
-Clone the repository and run all services with one command:
+You can run EduVibe locally using **Docker (Recommended)** or **Manual Node.js**.
 
-```bash
-git clone https://github.com/ajaygangwar945/EduVibe-LMS.git
+---
+
+### Option A: Run with Docker (Recommended — All Services in 1 Command)
+
+Docker automatically builds and runs the React Frontend, Node.js Backend, MongoDB Database, Mongo Express GUI, and optionally Prometheus & Grafana.
+
+#### Step 1: Open Docker Desktop
+Ensure **Docker Desktop** is open and running on your machine.
+
+#### Step 2: Open Terminal in Project Directory
+```powershell
 cd EduVibe-LMS
-docker compose up -d --build
 ```
 
-Access locally:
-- **Frontend**: [http://localhost:3005](http://localhost:3005)
-- **Backend API**: [http://localhost:5000/api/health](http://localhost:5000/api/health)
-- **MongoDB Explorer**: [http://localhost:8081](http://localhost:8081)
+#### Step 3: Start the Application
+
+- **To run Core Application only** (Frontend, Backend, MongoDB, Mongo Express):
+  ```bash
+  docker compose up -d
+  ```
+
+- **To run Application + Full Monitoring Stack** (Frontend, Backend, MongoDB, Mongo Express, Prometheus & Grafana):
+  ```bash
+  docker compose --profile monitoring up -d
+  ```
+
+#### Step 4: Verify Running Services
+Run `docker ps` to verify all containers are active:
+- `eduvibe-frontend` ➔ Up on port `3005`
+- `eduvibe-backend` ➔ Up on port `5000` (healthy)
+- `eduvibe-mongo-express` ➔ Up on port `8081`
+- `eduvibe-mongo` ➔ Up on port `27018` (healthy)
+- *(Optional)* `eduvibe-prometheus` ➔ Up on port `9090`
+- *(Optional)* `eduvibe-grafana` ➔ Up on port `3001`
+
+#### Step 5: Access the Local URLs in Browser
+
+| Service | Local URL | Default Credentials | Description |
+| :--- | :--- | :--- | :--- |
+| 🎓 **React Frontend** | [http://localhost:3005](http://localhost:3005) | *(See Accounts Below)* | Student, Faculty & Admin Web Portal |
+| 🔌 **Backend API Health** | [http://localhost:5000/api/health](http://localhost:5000/api/health) | *None* | REST API Healthcheck endpoint |
+| 📊 **Prometheus Metrics** | [http://localhost:5000/metrics](http://localhost:5000/metrics) | *None* | Live Prometheus metrics feed |
+| 🗄️ **MongoDB Web GUI** | [http://localhost:8081](http://localhost:8081) | `admin` / `EduVibeSecure2026!` | Mongo Express database explorer |
+| 📈 **Prometheus Server** | [http://localhost:9090](http://localhost:9090) | *None* | Metric query & scrape targets explorer |
+| 📊 **Grafana Analytics** | [http://localhost:3001](http://localhost:3001) | `admin` / `EduVibeGrafana2026!` | Real-time monitoring dashboards |
+
+#### Step 6: How to Stop Docker Containers
+When you are finished testing:
+```bash
+# Stop application:
+docker compose down
+
+# Stop application and monitoring:
+docker compose --profile monitoring down
+```
+
+---
+
+### Option B: Run Manually with Node.js & npm (Development Mode)
+
+#### 1. Start Backend:
+```bash
+cd server
+npm install
+npm run dev
+# Backend starts at http://localhost:5000
+```
+
+#### 2. Start Frontend:
+```bash
+cd ../client
+npm install
+npm run dev
+# Frontend starts at http://localhost:5173
+```
+
+---
+
+### 🔑 Local Starter Accounts for Testing
+
+The database automatically seeds starter demo accounts on first launch:
+
+| Role | Email | Password | Access Capabilities |
+| :--- | :--- | :--- | :--- |
+| **System Admin** | `admin@eduvibe.com` | `admin123` | Approve faculty, manage all users, view system KPIs |
+| **Faculty** | `robert.smith@eduvibe.com` | `password123` | Create courses, quizzes, assignments, mark attendance |
+| **Student** | *(Self-Register)* | *(Your Password)* | Click **Register as Student** on login page to get roll number STU-2026-XXXX |
 
 ---
 

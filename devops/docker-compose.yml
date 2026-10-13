@@ -78,6 +78,33 @@ services:
     networks:
       - eduvibe-network
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: eduvibe-prometheus
+    restart: always
+    profiles: ["monitoring", "all"]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - eduvibe-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: eduvibe-grafana
+    restart: always
+    profiles: ["monitoring", "all"]
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-EduVibeGrafana2026!}
+    depends_on:
+      - prometheus
+    networks:
+      - eduvibe-network
+
 volumes:
   mongo_data:
   uploads_data:
