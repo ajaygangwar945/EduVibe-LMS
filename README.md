@@ -18,11 +18,12 @@ The entire infrastructure is automated using **Terraform (Infrastructure as Code
 
 ---
 
-## 🌐 Live Cloud Deployment (Permanent AWS Static IP)
-- 🔗 **Web Portal**: [http://54.173.124.101:3005](http://54.173.124.101:3005)
-- 🍃 **MongoDB Visual Cloud Explorer**: [http://54.173.124.101:8081](http://54.173.124.101:8081)
-- 📊 **Prometheus Metrics**: [http://54.173.124.101:9090](http://54.173.124.101:9090)
-- 📈 **Grafana Analytics**: [http://54.173.124.101:3001](http://54.173.124.101:3001)
+## 🌐 Live Cloud Deployment Architecture
+- 🔗 **Web Portal (Vercel)**: `https://<your-vercel-domain>.vercel.app`
+- ⚡ **Backend API**: `http://<YOUR_AWS_ELASTIC_IP>:5000`
+- 🍃 **MongoDB Visual Cloud Explorer**: `http://<YOUR_AWS_ELASTIC_IP>:8081`
+- 📊 **Prometheus Metrics**: `http://<YOUR_AWS_ELASTIC_IP>:9090`
+- 📈 **Grafana Analytics**: `http://<YOUR_AWS_ELASTIC_IP>:3001`
 
 ---
 
@@ -102,10 +103,10 @@ The entire infrastructure is automated using **Terraform (Infrastructure as Code
 
 | Portal | URL | Username / Email | Password |
 |---|---|---|---|
-| **System Admin** | `http://localhost:3005` or `http://54.173.124.101:3005` | `admin@eduvibe.com` | `admin123` |
-| **Sample Faculty** | `http://localhost:3005` or `http://54.173.124.101:3005` | `robert.smith@eduvibe.com` | `password123` |
-| **Mongo Express** | `http://localhost:8081` or `http://54.173.124.101:8081` | `admin` | `EduVibeSecure2026!` |
-| **Grafana Analytics** | `http://localhost:3001` or `http://54.173.124.101:3001` | `admin` | `EduVibeGrafana2026!` |
+| **System Admin** | `http://localhost:3005` or `http://<YOUR_AWS_ELASTIC_IP>:3005` | `admin@eduvibe.com` | `admin123` *(Configurable via ADMIN_PASSWORD)* |
+| **Sample Faculty** | `http://localhost:3005` or `http://<YOUR_AWS_ELASTIC_IP>:3005` | `robert.smith@eduvibe.com` | `password123` |
+| **Mongo Express** | `http://localhost:8081` or `http://<YOUR_AWS_ELASTIC_IP>:8081` | `admin` | *(Configured via MONGO_EXPRESS_PASSWORD)* |
+| **Grafana Analytics** | `http://localhost:3001` or `http://<YOUR_AWS_ELASTIC_IP>:3001` | `admin` | *(Configured via GRAFANA_ADMIN_PASSWORD)* |
 
 ---
 
@@ -187,9 +188,9 @@ Run `docker ps` to verify all containers are active:
 | 🎓 **React Frontend** | [http://localhost:3005](http://localhost:3005) | *(See Accounts Below)* | Student, Faculty & Admin Web Portal |
 | 🔌 **Backend API Health** | [http://localhost:5000/api/health](http://localhost:5000/api/health) | *None* | REST API Healthcheck endpoint |
 | 📊 **Prometheus Metrics** | [http://localhost:5000/metrics](http://localhost:5000/metrics) | *None* | Live Prometheus metrics feed |
-| 🗄️ **MongoDB Web GUI** | [http://localhost:8081](http://localhost:8081) | `admin` / `EduVibeSecure2026!` | Mongo Express database explorer |
+| 🗄️ **MongoDB Web GUI** | [http://localhost:8081](http://localhost:8081) | `admin` / *(Configured in .env)* | Mongo Express database explorer |
 | 📈 **Prometheus Server** | [http://localhost:9090](http://localhost:9090) | *None* | Metric query & scrape targets explorer |
-| 📊 **Grafana Analytics** | [http://localhost:3001](http://localhost:3001) | `admin` / `EduVibeGrafana2026!` | Real-time monitoring dashboards |
+| 📊 **Grafana Analytics** | [http://localhost:3001](http://localhost:3001) | `admin` / *(Configured in .env)* | Real-time monitoring dashboards |
 
 #### Step 6: How to Stop Docker Containers
 When you are finished testing:
@@ -237,7 +238,7 @@ Ensure MongoDB is running on your machine:
    ```env
    PORT=5000
    MONGO_URI=mongodb://127.0.0.1:27017/eduvibe
-   JWT_SECRET=eduvibe_super_secret_jwt_key_2026
+   JWT_SECRET=<YOUR_RANDOM_SECRET_KEY>
    ADMIN_EMAIL=admin@eduvibe.com
    ADMIN_PASSWORD=admin123
    CLIENT_URL=http://localhost:5173
