@@ -1,5 +1,10 @@
 node_modules
 dist
-npm-debug.log
+npm-debug.log*
+*.log
 .git
 .gitignore
+.env
+.env.*
+.DS_Store
+Thumbs.db

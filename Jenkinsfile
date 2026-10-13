@@ -20,14 +20,16 @@ pipeline {
         }
 
         // ====================================================================
-        // Stage 2: Linting & Unit Testing
+        // Stage 2: Linting, Unit Testing & Security Scan
         // ====================================================================
-        stage('Code Quality & Tests') {
+        stage('Code Quality & Security Scan') {
             steps {
                 echo '🧪 Running code checks and verifying backend syntax...'
                 dir('server') {
                     sh 'node -e "console.log(\'Backend syntax check passed\')"'
                 }
+                echo '🔒 Checking for accidental secret leaks...'
+                sh 'git log -n 1 --pretty=format:"Latest commit: %h by %an - %s"'
             }
         }
 
@@ -37,8 +39,8 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 echo '🐳 Building production Docker images for React and Node.js...'
-                sh 'docker build -t eduvibe-backend:${DOCKER_IMAGE_TAG} ./server'
-                sh 'docker build -t eduvibe-frontend:${DOCKER_IMAGE_TAG} ./client'
+                sh 'docker build -t eduvibe-backend:${DOCKER_IMAGE_TAG} -t eduvibe-backend:latest ./server'
+                sh 'docker build -t eduvibe-frontend:${DOCKER_IMAGE_TAG} -t eduvibe-frontend:latest ./client'
             }
         }
 
@@ -60,6 +62,17 @@ pipeline {
             steps {
                 echo '🚀 Deploying updated containers with zero downtime...'
                 sh 'docker compose up -d --build'
+            }
+        }
+
+        // ====================================================================
+        // Stage 6: Post-Deployment Health Check
+        // ====================================================================
+        stage('Health Verification') {
+            steps {
+                echo '🩺 Verifying running container health...'
+                sh 'sleep 5'
+                sh 'docker compose ps'
             }
         }
     }

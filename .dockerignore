@@ -6,10 +6,15 @@ client/dist
 .gitignore
 .env
 .env.*
+*.pem
+*.key
 *.log
 npm-debug.log*
 devops/terraform/.terraform
 *.tfstate
 *.tfstate.*
+*.tfvars
 server/uploads/*
 !server/uploads/.gitkeep
+.DS_Store
+Thumbs.db

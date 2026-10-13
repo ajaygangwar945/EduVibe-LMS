@@ -98,6 +98,31 @@ The entire infrastructure is automated using **Terraform (Infrastructure as Code
 | **Orchestration** | Kubernetes (`k8s/` manifests for Deployment, Service, PVC, Ingress) |
 | **Observability** | Prometheus (`prom-client`), Grafana Dashboards |
 
+## 🔑 Default Credentials & Access
+
+| Portal | URL | Username / Email | Password |
+|---|---|---|---|
+| **System Admin** | `http://localhost:3005` or `http://54.173.124.101:3005` | `admin@eduvibe.com` | `admin123` |
+| **Sample Faculty** | `http://localhost:3005` or `http://54.173.124.101:3005` | `robert.smith@eduvibe.com` | `password123` |
+| **Mongo Express** | `http://localhost:8081` or `http://54.173.124.101:8081` | `admin` | `EduVibeSecure2026!` |
+| **Grafana Analytics** | `http://localhost:3001` or `http://54.173.124.101:3001` | `admin` | `EduVibeGrafana2026!` |
+
+---
+
+## 🔒 Security & DevSecOps Best Practices
+
+EduVibe is engineered with enterprise security best practices:
+- **NoSQL Injection Defense**: Strict type checking and string coercion prevents query operator injection attacks.
+- **Brute-Force Rate Limiting**: In-memory rate limiter on authentication endpoints stops dictionary and credential stuffing attacks.
+- **IDOR Protection**: Object-level access control guarantees faculty can only grade, modify, or upload to subjects they teach.
+- **Strict File Upload Sanitization**: Double-checked MIME type and extension whitelist (`.pdf`, `.docx`, `.mp4`, etc.) with randomized filenames to eliminate remote code execution (RCE).
+- **Container Hardening**: Node.js backend runs under unprivileged non-root user `node` in Docker; sensitive files (`.env`, `*.key`, `*.pem`) are barred via `.dockerignore`.
+- **AWS Infrastructure Security**:
+  - Permanent Elastic IP (`aws_eip`) ensures stable zero-friction access across reboots.
+  - S3 bucket blocks all public access; media is served strictly through CloudFront via Origin Access Control (OAC) with AWS Signature Version 4.
+  - S3 Server-Side Encryption (AES-256) and EBS encryption at rest (`encrypted = true`) enabled.
+  - Network segmentation: MongoDB port `27017` is bound strictly to loopback `127.0.0.1` and not exposed to the public internet.
+
 ---
 
 ## 🚀 Quick Start (Local Run with Docker)
@@ -149,23 +174,28 @@ EduVibe/
 │   │   └── index.css          # Design tokens & glassmorphic styling
 │   ├── vercel.json            # Vercel deployment configuration & reverse proxy
 │   ├── Dockerfile             # Multi-stage Nginx container build
-│   └── nginx.conf             # Reverse proxy configuration
+│   ├── nginx.conf             # Reverse proxy configuration
+│   └── .dockerignore          # Frontend Docker ignore
 │
 ├── server/                     # Node.js Express Backend
 │   ├── models/                # User, Course, Attendance, Quiz, Assignment
 │   ├── routes/                # auth.js, student.js, faculty.js, admin.js
 │   ├── middleware/            # JWT verification & Multer file uploads
 │   ├── server.js              # Express app + /metrics Prometheus endpoint
-│   └── Dockerfile             # Alpine Linux Node.js container
+│   ├── Dockerfile             # Alpine Linux Node.js container (non-root)
+│   └── .dockerignore          # Secret and cache ignore
 │
 ├── devops/
 │   ├── terraform/             # AWS Infrastructure as Code (EC2, S3, CloudFront, ECR, IAM, Elastic IP)
-│   ├── k8s/                   # Kubernetes manifests (Mongo, Backend, Frontend, Ingress)
+│   ├── k8s/                   # Kubernetes manifests (Mongo, Backend, Frontend, Ingress, Secrets, ConfigMap)
 │   ├── monitoring/            # Prometheus scrape config & Grafana compose
 │   ├── docker-compose.yml     # Container orchestration
 │   └── Jenkinsfile            # Multi-stage CI/CD pipeline
 │
+├── .dockerignore              # Root container build ignore
+├── .gitignore                 # Git ignore for secrets & build outputs
 ├── docker-compose.yml         # Root container configuration
+├── Jenkinsfile                # Root CI/CD pipeline
 └── README.md
 ```
 
