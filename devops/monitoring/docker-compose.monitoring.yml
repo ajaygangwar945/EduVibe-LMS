@@ -7,7 +7,7 @@ services:
     container_name: eduvibe-prometheus
     restart: always
     ports:
-      - "${PROMETHEUS_PORT:-9091}:9090"
+      - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     networks:

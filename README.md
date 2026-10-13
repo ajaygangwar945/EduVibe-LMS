@@ -174,23 +174,22 @@ cd EduVibe-LMS
 #### Step 4: Verify Running Services
 Run `docker ps` to verify all containers are active:
 - `eduvibe-frontend` ➔ Up on port `3005`
-- `eduvibe-backend` ➔ Up on port `5001` (healthy)
+- `eduvibe-backend` ➔ Up on port `5000` (healthy)
 - `eduvibe-mongo-express` ➔ Up on port `8081`
 - `eduvibe-mongo` ➔ Up on port `27018` (healthy)
-- *(Optional)* `eduvibe-prometheus` ➔ Up on port `9091`
+- *(Optional)* `eduvibe-prometheus` ➔ Up on port `9090`
 - *(Optional)* `eduvibe-grafana` ➔ Up on port `3001`
 
 #### Step 5: Access the Local URLs in Browser
 
-| Service | Docker URL | Local Native URL | Port Collision Guard |
+| Service | Local URL | Default Credentials | Description |
 | :--- | :--- | :--- | :--- |
-| 🎓 **React Frontend** | [http://localhost:3005](http://localhost:3005) | [http://localhost:5173](http://localhost:5173) | ✅ `3005` vs `5173` (No conflict) |
-| 🔌 **Backend API Health** | [http://localhost:5001/api/health](http://localhost:5001/api/health) | [http://localhost:5000/api/health](http://localhost:5000/api/health) | ✅ `5001` vs `5000` (No conflict) |
-| 📊 **Prometheus Metrics** | [http://localhost:5001/metrics](http://localhost:5001/metrics) | [http://localhost:5000/metrics](http://localhost:5000/metrics) | ✅ `5001` vs `5000` (No conflict) |
-| 🗄️ **MongoDB Web GUI** | [http://localhost:8081](http://localhost:8081) | *(Docker only)* | ✅ `8081` (Dedicated) |
-| 🍃 **MongoDB Database** | `127.0.0.1:27018` | `127.0.0.1:27017` | ✅ `27018` vs `27017` (No conflict) |
-| 📈 **Prometheus Server** | [http://localhost:9091](http://localhost:9091) | [http://localhost:9090](http://localhost:9090) | ✅ `9091` vs `9090` (No conflict) |
-| 📊 **Grafana Analytics** | [http://localhost:3001](http://localhost:3001) | [http://localhost:3000](http://localhost:3000) | ✅ `3001` vs `3000` (No conflict) |
+| 🎓 **React Frontend** | [http://localhost:3005](http://localhost:3005) | *(See Accounts Below)* | Student, Faculty & Admin Web Portal |
+| 🔌 **Backend API Health** | [http://localhost:5000/api/health](http://localhost:5000/api/health) | *None* | REST API Healthcheck endpoint |
+| 📊 **Prometheus Metrics** | [http://localhost:5000/metrics](http://localhost:5000/metrics) | *None* | Live Prometheus metrics feed |
+| 🗄️ **MongoDB Web GUI** | [http://localhost:8081](http://localhost:8081) | `admin` / `EduVibeSecure2026!` | Mongo Express database explorer |
+| 📈 **Prometheus Server** | [http://localhost:9090](http://localhost:9090) | *None* | Metric query & scrape targets explorer |
+| 📊 **Grafana Analytics** | [http://localhost:3001](http://localhost:3001) | `admin` / `EduVibeGrafana2026!` | Real-time monitoring dashboards |
 
 #### Step 6: How to Stop Docker Containers
 When you are finished testing:
