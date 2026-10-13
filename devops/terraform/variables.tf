@@ -1,0 +1,29 @@
+variable "aws_region" {
+  description = "The AWS Region where all resources will be created"
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "project_name" {
+  description = "Name tag prefix for all resources"
+  type        = string
+  default     = "eduvibe"
+}
+
+variable "environment" {
+  description = "Environment name (dev, staging, prod)"
+  type        = string
+  default     = "prod"
+}
+
+variable "instance_type" {
+  description = "EC2 instance size. t2.micro or t3.micro is 100% Free-Tier eligible. t3.small gives 2GB RAM for extra speed."
+  type        = string
+  default     = "t2.micro"
+}
+
+variable "alert_email" {
+  description = "Email address for SNS notifications (approvals and high CPU alarms)"
+  type        = string
+  default     = "admin@eduvibe.com"
+}

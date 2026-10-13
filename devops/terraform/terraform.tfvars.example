@@ -1,0 +1,8 @@
+# Example configuration variables for AWS deployment
+# Copy or rename this file to 'terraform.tfvars' to customize values:
+
+aws_region    = "us-east-1"      # e.g., us-east-1, ap-south-1 (Mumbai), eu-west-1
+project_name  = "eduvibe"
+environment   = "prod"
+instance_type = "t2.micro"       # Free Tier eligible (750 hours/month free)
+alert_email   = "admin@eduvibe.com"

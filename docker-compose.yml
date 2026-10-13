@@ -1,0 +1,85 @@
+services:
+  # ---------------------------------------------------------------------------
+  # 1. MongoDB Database Container
+  # ---------------------------------------------------------------------------
+  mongo:
+    image: mongo:7.0
+    container_name: eduvibe-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - eduvibe-network
+
+  # ---------------------------------------------------------------------------
+  # 2. Visual Web Viewer for MongoDB (Open http://localhost:8081 in Chrome)
+  # ---------------------------------------------------------------------------
+  mongo-express:
+    image: mongo-express:latest
+    container_name: eduvibe-mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH=false
+    depends_on:
+      - mongo
+    networks:
+      - eduvibe-network
+
+  # ---------------------------------------------------------------------------
+  # 3. Node.js Express API Container
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: eduvibe-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/eduvibe
+      - JWT_SECRET=eduvibe_docker_jwt_key_2026
+      - ADMIN_EMAIL=admin@eduvibe.com
+      - ADMIN_PASSWORD=admin123
+    depends_on:
+      - mongo
+    volumes:
+      - uploads_data:/app/uploads
+    networks:
+      - eduvibe-network
+
+  # ---------------------------------------------------------------------------
+  # 4. React Frontend Container (Nginx) - Port 3005
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: eduvibe-frontend
+    restart: always
+    ports:
+      - "3005:80"
+    depends_on:
+      - backend
+    networks:
+      - eduvibe-network
+
+# -----------------------------------------------------------------------------
+# Persistent Volumes (Data never gets lost on restart)
+# -----------------------------------------------------------------------------
+volumes:
+  mongo_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  eduvibe-network:
+    driver: bridge
