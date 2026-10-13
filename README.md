@@ -14,6 +14,8 @@
 ## 🚀 View Live Site
 The project is live and accessible online.
 
+[![Vercel Live](https://img.shields.io/badge/Vercel-Live%20Website-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://edu-vibe-lms.vercel.app/)
+
 🔗 [Live Website](https://edu-vibe-lms.vercel.app/)
 
 ---
