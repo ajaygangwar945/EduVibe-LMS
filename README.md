@@ -14,7 +14,7 @@
 ## 🚀 View Live Site
 The project is live and accessible online.
 
-🔗 **[Live Website](https://edu-vibe-lms.vercel.app/)**
+🔗 [Live Website](https://edu-vibe-lms.vercel.app/)
 
 ---
 
