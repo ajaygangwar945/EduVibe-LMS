@@ -35,21 +35,49 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
     setSuccessMsg('');
 
+    // Security & Input Validation
+    const trimmedEmail = formData.email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setError('Please provide a valid email address.');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
+    if (isRegistering && !formData.name.trim()) {
+      setError('Please enter your full name.');
+      return;
+    }
+
+    setLoading(true);
+
     try {
+      const payload = {
+        ...formData,
+        name: formData.name.trim(),
+        email: trimmedEmail,
+        phone: formData.phone.trim(),
+        address: formData.address.trim(),
+        courseName: formData.courseName.trim(),
+      };
+
       if (isRegistering) {
         if (activeRole === 'student') {
-          await registerStudent(formData);
+          await registerStudent(payload);
         } else if (activeRole === 'faculty') {
-          const res = await registerFaculty(formData);
+          const res = await registerFaculty(payload);
           setSuccessMsg(res.message);
           setIsRegistering(false);
         }
       } else {
-        await login(formData.email, formData.password, activeRole);
+        await login(trimmedEmail, formData.password, activeRole);
       }
     } catch (err) {
       setError(err.message || 'An error occurred during authentication.');

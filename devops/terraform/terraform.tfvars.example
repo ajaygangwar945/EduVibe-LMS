@@ -5,4 +5,5 @@ aws_region    = "us-east-1"      # e.g., us-east-1, ap-south-1 (Mumbai), eu-west
 project_name  = "eduvibe"
 environment   = "prod"
 instance_type = "t2.micro"       # Free Tier eligible (750 hours/month free)
-alert_email   = "admin@eduvibe.com"
+alert_email       = "admin@eduvibe.com"
+admin_cidr_blocks = ["0.0.0.0/0"] # Set to ["YOUR_IP/32"] to restrict SSH/Grafana/Mongo Express

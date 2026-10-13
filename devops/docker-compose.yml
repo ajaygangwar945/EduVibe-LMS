@@ -3,8 +3,15 @@ services:
     image: mongo:7.0
     container_name: eduvibe-mongo
     restart: always
+    # Security: Bind to localhost only so external network scanners cannot access MongoDB directly
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     volumes:
       - mongo_data:/data/db
     networks:
@@ -19,9 +26,13 @@ services:
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongo
       - ME_CONFIG_MONGODB_PORT=27017
-      - ME_CONFIG_BASICAUTH=false
+      # Security: Enforce basic authentication to prevent unauthenticated database manipulation
+      - ME_CONFIG_BASICAUTH=true
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_EXPRESS_USER:-admin}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_EXPRESS_PASSWORD:-EduVibeSecure2026!}
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     networks:
       - eduvibe-network
 
@@ -36,11 +47,12 @@ services:
     environment:
       - PORT=5000
       - MONGO_URI=mongodb://mongo:27017/eduvibe
-      - JWT_SECRET=eduvibe_docker_jwt_key_2026
-      - ADMIN_EMAIL=admin@eduvibe.com
-      - ADMIN_PASSWORD=admin123
+      - JWT_SECRET=${JWT_SECRET:-eduvibe_docker_jwt_key_2026}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@eduvibe.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-AdminSecure2026!}
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     volumes:
       - uploads_data:/app/uploads
     networks:
@@ -65,4 +77,5 @@ volumes:
 
 networks:
   eduvibe-network:
+    name: eduvibe-network
     driver: bridge

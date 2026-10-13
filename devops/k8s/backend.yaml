@@ -33,17 +33,44 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: eduvibe-config
           env:
-            - name: PORT
-              value: "5000"
-            - name: MONGO_URI
-              value: "mongodb://mongo-service:27017/eduvibe"
             - name: JWT_SECRET
-              value: "eduvibe_k8s_jwt_secret_2026"
+              valueFrom:
+                secretKeyRef:
+                  name: eduvibe-secrets
+                  key: jwt-secret
             - name: ADMIN_EMAIL
-              value: "admin@eduvibe.com"
+              valueFrom:
+                secretKeyRef:
+                  name: eduvibe-secrets
+                  key: admin-email
             - name: ADMIN_PASSWORD
-              value: "admin123"
+              valueFrom:
+                secretKeyRef:
+                  name: eduvibe-secrets
+                  key: admin-password
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
           volumeMounts:
             - name: uploads-storage
               mountPath: /app/uploads

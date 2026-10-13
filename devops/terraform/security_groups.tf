@@ -9,7 +9,7 @@ resource "aws_security_group" "eduvibe_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.admin_cidr_blocks
   }
 
   # HTTP Web Traffic
@@ -54,7 +54,7 @@ resource "aws_security_group" "eduvibe_sg" {
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.admin_cidr_blocks
   }
 
   # Mongo Express Web Database Viewer
@@ -63,7 +63,7 @@ resource "aws_security_group" "eduvibe_sg" {
     from_port   = 8081
     to_port     = 8081
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.admin_cidr_blocks
   }
 
   # Prometheus Server
@@ -72,7 +72,7 @@ resource "aws_security_group" "eduvibe_sg" {
     from_port   = 9090
     to_port     = 9090
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.admin_cidr_blocks
   }
 
   # Grafana Dashboard
@@ -81,7 +81,7 @@ resource "aws_security_group" "eduvibe_sg" {
     from_port   = 3001
     to_port     = 3001
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.admin_cidr_blocks
   }
 
   # Outbound rule: Allow server to talk to internet to pull Docker images & updates

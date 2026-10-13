@@ -27,3 +27,9 @@ variable "alert_email" {
   type        = string
   default     = "admin@eduvibe.com"
 }
+
+variable "admin_cidr_blocks" {
+  description = "Allowed CIDR IP ranges for administrative interfaces (SSH, Jenkins, Mongo Express, Prometheus, Grafana). Set to your IP (e.g. ['203.0.113.50/32']) in production."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}

@@ -18,11 +18,11 @@ The entire infrastructure is automated using **Terraform (Infrastructure as Code
 
 ---
 
-## 🌐 Live Cloud Deployment
-- 🔗 **Web Portal**: [http://54.234.46.138:3005](http://54.234.46.138:3005)
-- 🍃 **MongoDB Visual Cloud Explorer**: [http://54.234.46.138:8081](http://54.234.46.138:8081)
-- 📊 **Prometheus Metrics**: [http://54.234.46.138:9090](http://54.234.46.138:9090)
-- 📈 **Grafana Analytics**: [http://54.234.46.138:3001](http://54.234.46.138:3001)
+## 🌐 Live Cloud Deployment (Permanent AWS Static IP)
+- 🔗 **Web Portal**: [http://54.173.124.101:3005](http://54.173.124.101:3005)
+- 🍃 **MongoDB Visual Cloud Explorer**: [http://54.173.124.101:8081](http://54.173.124.101:8081)
+- 📊 **Prometheus Metrics**: [http://54.173.124.101:9090](http://54.173.124.101:9090)
+- 📈 **Grafana Analytics**: [http://54.173.124.101:3001](http://54.173.124.101:3001)
 
 ---
 
@@ -147,6 +147,7 @@ EduVibe/
 │   │   ├── context/           # AuthContext (JWT session management)
 │   │   ├── App.jsx
 │   │   └── index.css          # Design tokens & glassmorphic styling
+│   ├── vercel.json            # Vercel deployment configuration & reverse proxy
 │   ├── Dockerfile             # Multi-stage Nginx container build
 │   └── nginx.conf             # Reverse proxy configuration
 │
@@ -158,7 +159,7 @@ EduVibe/
 │   └── Dockerfile             # Alpine Linux Node.js container
 │
 ├── devops/
-│   ├── terraform/             # AWS Infrastructure as Code (EC2, S3, CloudFront, ECR, IAM)
+│   ├── terraform/             # AWS Infrastructure as Code (EC2, S3, CloudFront, ECR, IAM, Elastic IP)
 │   ├── k8s/                   # Kubernetes manifests (Mongo, Backend, Frontend, Ingress)
 │   ├── monitoring/            # Prometheus scrape config & Grafana compose
 │   ├── docker-compose.yml     # Container orchestration

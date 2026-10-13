@@ -97,8 +97,8 @@ export default function AdminDashboard() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          customRegNumber: customRegNumber || undefined,
-          newPassword: customPassword || undefined,
+          customRegNumber: customRegNumber.trim() || undefined,
+          newPassword: customPassword.trim() || undefined,
         }),
       });
 

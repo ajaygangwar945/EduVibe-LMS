@@ -162,6 +162,17 @@ export default function StudentDashboard() {
     e.preventDefault();
     if (!uploadFile || !selectedAssignment) return;
 
+    // Security & File Validation
+    const fileName = uploadFile.name.toLowerCase();
+    if (!fileName.endsWith('.pdf')) {
+      alert('Security Validation: Only PDF files (.pdf) are permitted for assignment submissions.');
+      return;
+    }
+    if (uploadFile.size > 25 * 1024 * 1024) {
+      alert('File Size Error: Assignment PDF must be under 25MB.');
+      return;
+    }
+
     setUploading(true);
     const formData = new FormData();
     formData.append('submissionFile', uploadFile);
@@ -191,7 +202,7 @@ export default function StudentDashboard() {
 
   return (
     <div style={{ minHeight: '100vh', paddingBottom: '3rem' }}>
-      
+
       {/* Top Navbar */}
       <nav className="navbar">
         <div className="nav-brand">

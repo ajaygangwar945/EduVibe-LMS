@@ -172,6 +172,18 @@ export default function FacultyDashboard() {
     e.preventDefault();
     if (!materialFile || !selectedCourseForMaterial) return;
 
+    // Security & File Validation
+    const ext = materialFile.name.split('.').pop().toLowerCase();
+    const allowedExtensions = ['pdf', 'doc', 'docx', 'mp4', 'webm', 'mkv', 'mov', 'avi'];
+    if (!allowedExtensions.includes(ext)) {
+      alert('Security Validation: Only PDF documents and video files (.mp4, .webm, .mkv) are allowed.');
+      return;
+    }
+    if (materialFile.size > 100 * 1024 * 1024) {
+      alert('File Size Error: File exceeds the 100MB limit.');
+      return;
+    }
+
     setUploadingMaterial(true);
     const formData = new FormData();
     formData.append('file', materialFile);
@@ -264,6 +276,18 @@ export default function FacultyDashboard() {
   // Handle Create Assignment
   const handleSaveAssignment = async (e) => {
     e.preventDefault();
+
+    if (assignmentBriefFile) {
+      if (!assignmentBriefFile.name.toLowerCase().endsWith('.pdf')) {
+        alert('Security Validation: Assignment brief attachment must be a PDF file (.pdf).');
+        return;
+      }
+      if (assignmentBriefFile.size > 25 * 1024 * 1024) {
+        alert('File Size Error: Assignment brief must be under 25MB.');
+        return;
+      }
+    }
+
     const formData = new FormData();
     formData.append('title', assignmentForm.title);
     formData.append('description', assignmentForm.description);
