@@ -9,14 +9,17 @@
 [![MongoDB](https://img.shields.io/badge/Database-MongoDB%207.0-47A248?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)
 [![Prometheus](https://img.shields.io/badge/Monitoring-Prometheus%20%2B%20Grafana-E6522C?style=for-the-badge&logo=prometheus)](https://prometheus.io/)
 
+<p align="center">
+  <img src="assets/eduvibe-banner.jpg" alt="EduVibe - Next-Gen Academic & Learning Management Portal" width="100%" height="200" style="object-fit: cover; border-radius: 8px;">
+</p>
+
 ---
 
 ## 🚀 View Live Site
+
 The project is live and accessible online.
 
 [![Vercel Live](https://img.shields.io/badge/Vercel-Live%20Website-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://edu-vibe-lms.vercel.app/)
-
-🔗 [Live Website](https://edu-vibe-lms.vercel.app/)
 
 ---
 
@@ -122,27 +125,32 @@ flowchart TD
 The architecture is divided into decoupled operational tiers to guarantee low latency, robust data isolation, and resilient high availability:
 
 ### 1. Request Routing & API Reverse Proxying
+
 - When a user accesses **[https://edu-vibe-lms.vercel.app/](https://edu-vibe-lms.vercel.app/)**, Vercel’s global Edge network delivers the optimized, minified React 18 single-page application from the closest geographical edge point.
 - When the frontend performs REST API requests (e.g. `/api/auth/login`, `/api/student/dashboard`), `vercel.json` rewrites and proxies traffic directly to the permanent **AWS Elastic IP** (`http://<YOUR_AWS_ELASTIC_IP>:5000`).
 - **Eliminating CORS & Mixed-Content**: The reverse proxy eliminates Cross-Origin Resource Sharing (CORS) friction and prevents browser mixed-content warnings by masking backend origin calls behind standard relative paths.
 
 ### 2. Role-Based Access Control (RBAC) & Authentication Flow
+
 - All passwords are encrypted using **Bcrypt** (salt rounds: 10) before storage in MongoDB.
 - Upon successful authentication, the backend generates a signed **JSON Web Token (JWT)** containing the user's unique ID, email, and role (`student`, `faculty`, or `admin`).
 - The client stores the JWT in local storage and includes an `Authorization: Bearer <token>` header with every outgoing request.
 - Express middleware intercepts requests, validates the cryptographic token signature, enforces role boundaries, and rejects unauthorized access with HTTP 403 Forbidden.
 
 ### 3. Course Management & Media Streaming Flow
+
 - **Course Creation & File Uploads**: A faculty member creates a subject and uploads syllabus materials (PDF) or recorded video lectures (`.mp4`, `.webm`).
 - **Sanitization & Multer Pipeline**: File uploads pass through strict Multer middleware validating file signatures and MIME types, sanitizing filenames, and writing them to persistent storage volumes.
 - **S3 & CloudFront Edge Distribution**: Assets sync with Amazon S3 (`eduvibe-storage-*`). When students stream videos or view lecture notes, requests route through **Amazon CloudFront CDN** (`d1dionuk6xtudv.cloudfront.net`) using Origin Access Control (OAC), providing buffered, low-latency playback worldwide without exposing the S3 bucket to public writes.
 
 ### 4. Academic Evaluation & Operations
+
 - **Quizzes & Automated Grading**: Faculty create timed quizzes with dynamic question counts and point values. When a student submits answers, the server automatically computes scores in real time, records the submission in MongoDB, and displays instant feedback.
 - **Daily Attendance Tracker**: Faculty select a subject, choose the date, and mark student presence. The student dashboard instantly renders attendance metrics with a dynamic visual gauge (flagging attendance below the mandatory 75% requirement in amber/red).
 - **Assignments**: Students submit PDF documents which faculty can download, grade, and annotate with feedback directly from the faculty console.
 
 ### 5. Observability & Telemetry Pipeline
+
 - The Express application instruments endpoints using `prom-client`, exposing a `/metrics` feed capturing request count, response duration percentiles, error rates, and system heap memory.
 - **Prometheus** scrapes the backend every 5 seconds.
 - **Grafana** connects to Prometheus as a data source, rendering visual dashboards for CPU usage, memory consumption, active HTTP traffic, and API response latencies.
@@ -191,13 +199,16 @@ EduVibe is designed with full deployment flexibility. Choose the method that bes
 *Ideal for development, debugging, and UI iteration with instant hot-reloading.*
 
 #### 1. Prerequisites
+
 - **Node.js** (v18.x or v20.x LTS) & **npm**
 - **MongoDB** running locally on Windows (Port `27017`) or via Docker (`docker compose up -d mongo`)
 - *(Optional)* **MongoDB Compass** for visual database browsing
 - *(Optional)* **Prometheus & Grafana** installed locally for metrics testing
 
 #### 2. Environment Configuration
+
 Create or verify `server/.env`:
+
 ```env
 PORT=5000
 MONGO_URI=mongodb://127.0.0.1:27017/eduvibe
@@ -208,13 +219,16 @@ CLIENT_URL=http://localhost:5173
 ```
 
 #### 3. Start Local MongoDB
+
 - Ensure the **MongoDB Server** service is running in Windows Services, or launch it via MongoDB Compass.
 - Alternatively, launch only the MongoDB container with Docker:
+
   ```bash
   docker compose up -d mongo
   ```
 
 #### 4. Run the Backend API (Terminal 1)
+
 ```powershell
 # Navigate to backend directory
 cd server
@@ -225,7 +239,9 @@ npm install
 # Run backend with nodemon hot-reload
 npm run dev
 ```
+
 **Expected Output:**
+
 ```text
 🚀 EduVibe Backend running on port 5000
 [Database] MongoDB connected successfully to mongodb://127.0.0.1:27017/eduvibe
@@ -233,6 +249,7 @@ npm run dev
 ```
 
 #### 5. Run the React Frontend (Terminal 2)
+
 ```powershell
 # Navigate to frontend directory
 cd client
@@ -243,22 +260,28 @@ npm install
 # Start Vite dev server
 npm run dev
 ```
+
 **Expected Output:**
+
 ```text
   VITE v5.x.x  ready in 320 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
 ```
+
 Open **[http://localhost:5173](http://localhost:5173)** in your browser. Vite automatically proxies `/api` and `/uploads` requests directly to `http://localhost:5000`.
 
 #### 6. Database Inspection via MongoDB Compass
+
 1. Launch **MongoDB Compass**.
 2. Connect to URI: `mongodb://localhost:27017/`
 3. Click on the **`eduvibe`** database to view collections: `users`, `courses`, `quizzes`, `attendances`, `assignments`.
 
 #### 7. Local Monitoring with Prometheus & Grafana (Optional)
+
 1. Add the target to your local `C:\Prometheus\prometheus.yml`:
+
    ```yaml
    scrape_configs:
      - job_name: "eduvibe-backend-local"
@@ -267,14 +290,18 @@ Open **[http://localhost:5173](http://localhost:5173)** in your browser. Vite au
        static_configs:
          - targets: ["localhost:5000"]
    ```
+
 2. Start Prometheus:
+
    ```powershell
    cd C:\Prometheus
    .\prometheus.exe --config.file=prometheus.yml
    ```
+
 3. Open Grafana at **[http://localhost:3000](http://localhost:3000)** and configure Prometheus (`http://localhost:9090`) as the data source.
 
 #### 8. Stopping Local Development
+
 Press `Ctrl + C` in both the backend and frontend terminal windows.
 
 ---
@@ -284,6 +311,7 @@ Press `Ctrl + C` in both the backend and frontend terminal windows.
 *Ideal for testing the full production-like containerized stack on any machine with zero manual runtime installation.*
 
 #### 1. Prerequisites
+
 - **Docker Desktop** installed and running on Windows, macOS, or Linux.
 
 #### 2. Start Application Containers
@@ -291,11 +319,13 @@ Press `Ctrl + C` in both the backend and frontend terminal windows.
 From the project root directory:
 
 - **Option A: Core Application Only** (Frontend, Backend, MongoDB, Mongo Express):
+
   ```bash
   docker compose up -d
   ```
 
 - **Option B: Application + Complete Monitoring Stack** (Includes Prometheus & Grafana):
+
   ```bash
   docker compose --profile monitoring up -d
   ```
@@ -312,7 +342,9 @@ From the project root directory:
 | `eduvibe-grafana` | Grafana Analytics | `http://localhost:3001` | Live dashboard visualizer |
 
 #### 4. Persistent Volumes & Data Safety
+
 Docker Compose uses named volumes to ensure zero data loss across restarts:
+
 - `mongo_data` ➔ Preserves all student records, faculty courses, and attendance logs.
 - `uploads_data` ➔ Preserves all uploaded PDFs, assignment submissions, and video files.
 
@@ -351,6 +383,7 @@ docker compose --profile monitoring down -v
 *Our live production deployment combining Vercel's global CDN for the frontend with AWS enterprise infrastructure for backend compute, storage, and monitoring.*
 
 #### 1. Part A: Provision AWS Infrastructure with Terraform
+
 All cloud resources are codified in `devops/terraform/`:
 
 ```bash
@@ -368,6 +401,7 @@ terraform apply -auto-approve
 ```
 
 Terraform automatically provisions:
+
 1. VPC & Security Groups with port whitelisting.
 2. IAM Roles & Instance Profiles for least-privilege cloud access.
 3. Amazon S3 Bucket (`eduvibe-storage-*`) with AES-256 encryption.
@@ -378,10 +412,12 @@ Terraform automatically provisions:
 8. Amazon CloudWatch Alarm + SNS Email Alert Topic.
 
 #### 2. Part B: Deploy Frontend to Vercel
+
 1. Link the repository to your [Vercel](https://vercel.com/) account.
 2. Set Root Directory to `client`.
 3. Framework Preset: **Vite**.
 4. The file `client/vercel.json` automatically configures edge URL rewrites:
+
    ```json
    {
      "rewrites": [
@@ -400,30 +436,41 @@ Terraform automatically provisions:
      ]
    }
    ```
+
 5. Deploy to generate your production URL: **[https://edu-vibe-lms.vercel.app/](https://edu-vibe-lms.vercel.app/)**.
 
 #### 3. Part C: Configure & Launch Backend on AWS EC2
+
 1. SSH into your newly provisioned AWS EC2 server:
+
    ```bash
    ssh -i <your-key.pem> ubuntu@<YOUR_AWS_ELASTIC_IP>
    ```
+
 2. Clone the repository and configure environment variables:
+
    ```bash
    git clone https://github.com/ajaygangwar945/EduVibe-LMS.git
    cd EduVibe-LMS
    ```
+
 3. Launch the container stack with Docker Compose:
+
    ```bash
    docker compose --profile monitoring up -d
    ```
+
 4. Verify backend health:
+
    ```bash
    curl http://localhost:5000/api/health
    # Returns: {"status":"healthy","uptime":...,"timestamp":...}
    ```
 
 #### 4. Part D: Automated CI/CD Pipeline (Jenkins)
+
 The included `Jenkinsfile` automates testing and deployment:
+
 1. **Checkout**: Pulls latest commit from GitHub `main` branch.
 2. **Lint & Test**: Runs automated unit and security checks.
 3. **Build Images**: Builds Docker images for `eduvibe-backend` and `eduvibe-frontend`.
@@ -431,12 +478,17 @@ The included `Jenkinsfile` automates testing and deployment:
 5. **Rolling Deploy**: Triggers zero-downtime container updates on the EC2 host.
 
 #### 5. Part E: Cost Management & Safe Cloud Teardown ($0 Protection)
+
 To avoid unnecessary AWS charges outside active demonstration periods:
+
 - **Temporary Pause**: Stop the EC2 instance via AWS Management Console or AWS CLI:
+
   ```bash
   aws ec2 stop-instances --instance-ids <YOUR_INSTANCE_ID>
   ```
+
 - **Full Teardown**: Destroy all cloud infrastructure with 1 command:
+
   ```bash
   cd devops/terraform
   terraform destroy -auto-approve
@@ -461,6 +513,7 @@ The platform automatically seeds starter accounts for demonstration and evaluati
 ## 🎯 Key Role Features Matrix
 
 ### 👨‍🎓 Student Portal
+
 - **Dashboard & Enrollment**: View personal profile, roll number, and enrolled courses.
 - **Course Catalog**: Browse department subjects and enroll with 1 click.
 - **In-Browser Video Streaming**: Stream lecture videos directly inside the browser with custom video controls.
@@ -470,6 +523,7 @@ The platform automatically seeds starter accounts for demonstration and evaluati
 - **Attendance Tracker**: Visual gauge of overall attendance percentage with automatic alert warnings when falling below 75%.
 
 ### 👩‍🏫 Faculty Portal
+
 - **Subject Management**: Create new courses and view enrolled student rosters.
 - **Resource Uploads**: Upload syllabus documents (PDF) and video lectures (`.mp4`, `.webm`).
 - **Daily Attendance Marking**: Select subject and date, toggle student presence, and save with 1 click.
@@ -477,6 +531,7 @@ The platform automatically seeds starter accounts for demonstration and evaluati
 - **Assignment Evaluation**: Download student PDF submissions, assign marks, and post feedback.
 
 ### 🛡️ Admin Console
+
 - **System KPIs**: Real-time counter of total students, active faculty, and courses.
 - **Faculty Approval Workflow**: 1-click approval that generates official Registration Numbers (e.g. `FAC-2026-XXXX`) and activates accounts.
 - **User Directory**: Search and filter all registered students and teachers.
@@ -487,6 +542,7 @@ The platform automatically seeds starter accounts for demonstration and evaluati
 ## 🔒 Security & DevSecOps Best Practices
 
 EduVibe is engineered with enterprise security best practices:
+
 - **NoSQL Injection Defense**: Strict type checking and string coercion prevents query operator injection attacks.
 - **Brute-Force Rate Limiting**: In-memory rate limiter on authentication endpoints stops dictionary and credential stuffing attacks.
 - **IDOR Protection**: Object-level access control guarantees faculty can only grade, modify, or upload to subjects they teach.
