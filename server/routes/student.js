@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Course = require('../models/Course');
 const Attendance = require('../models/Attendance');
 const Quiz = require('../models/Quiz');
@@ -68,6 +69,10 @@ router.get('/courses', async (req, res) => {
 // @desc    Enroll student in a course
 router.post('/courses/:id/enroll', async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid course ID format.' });
+    }
+
     const course = await Course.findById(req.params.id);
     if (!course) {
       return res.status(404).json({ success: false, message: 'Course not found.' });
@@ -75,15 +80,17 @@ router.post('/courses/:id/enroll', async (req, res) => {
 
     const student = await User.findById(req.user._id);
 
-    // Check if already enrolled
-    if (student.enrolledCourses.includes(course._id)) {
+    // Reliable ObjectId string check to prevent duplicate enrollments
+    const alreadyEnrolled = student.enrolledCourses.some(id => id.toString() === course._id.toString());
+    if (alreadyEnrolled) {
       return res.status(400).json({ success: false, message: 'You are already enrolled in this course.' });
     }
 
     student.enrolledCourses.push(course._id);
     await student.save();
 
-    if (!course.enrolledStudents.includes(student._id)) {
+    const courseHasStudent = course.enrolledStudents.some(id => id.toString() === student._id.toString());
+    if (!courseHasStudent) {
       course.enrolledStudents.push(student._id);
       await course.save();
     }
@@ -139,11 +146,22 @@ router.get('/quizzes', async (req, res) => {
 // @desc    Submit answers for a quiz with instant auto-grading
 router.post('/quizzes/:id/submit', async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid quiz ID format.' });
+    }
+
     const { answers } = req.body; // Array of selected option indices
     const quiz = await Quiz.findById(req.params.id);
 
     if (!quiz) {
       return res.status(404).json({ success: false, message: 'Quiz not found.' });
+    }
+
+    // Authorization check: Verify student is enrolled in the quiz course
+    const student = await User.findById(req.user._id);
+    const isEnrolled = student.enrolledCourses.some(id => id.toString() === quiz.course.toString());
+    if (!isEnrolled) {
+      return res.status(403).json({ success: false, message: 'You must be enrolled in this course to take the quiz.' });
     }
 
     // Check if student already submitted
@@ -154,13 +172,17 @@ router.post('/quizzes/:id/submit', async (req, res) => {
       return res.status(400).json({ success: false, message: 'You have already submitted this quiz.' });
     }
 
+    if (!Array.isArray(answers)) {
+      return res.status(400).json({ success: false, message: 'Answers must be submitted as an array.' });
+    }
+
     // Calculate score
     let score = 0;
     let totalPoints = 0;
 
     quiz.questions.forEach((q, idx) => {
       totalPoints += q.points || 1;
-      if (answers && answers[idx] === q.correctOptionIndex) {
+      if (answers[idx] !== undefined && Number(answers[idx]) === q.correctOptionIndex) {
         score += q.points || 1;
       }
     });
@@ -181,7 +203,7 @@ router.post('/quizzes/:id/submit', async (req, res) => {
       data: {
         score,
         totalPoints,
-        percentage: ((score / totalPoints) * 100).toFixed(1),
+        percentage: totalPoints > 0 ? ((score / totalPoints) * 100).toFixed(1) : 0,
       },
     });
   } catch (error) {
@@ -228,9 +250,20 @@ router.get('/assignments', async (req, res) => {
 // @desc    Submit assignment PDF file
 router.post('/assignments/:id/submit', upload.single('submissionFile'), async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid assignment ID format.' });
+    }
+
     const assignment = await Assignment.findById(req.params.id);
     if (!assignment) {
       return res.status(404).json({ success: false, message: 'Assignment not found.' });
+    }
+
+    // Verify student is enrolled in the course that issued this assignment
+    const student = await User.findById(req.user._id);
+    const isEnrolled = student.enrolledCourses.some(id => id.toString() === assignment.course.toString());
+    if (!isEnrolled) {
+      return res.status(403).json({ success: false, message: 'You must be enrolled in this course to submit assignments.' });
     }
 
     if (!req.file) {
@@ -293,17 +326,21 @@ router.get('/attendance', async (req, res) => {
     });
 
     logs.forEach(log => {
+      // Null-safety check for course reference
+      if (!log.course || !log.course._id) return;
+      const courseIdStr = log.course._id.toString();
+
       const record = log.records.find(
-        r => r.student.toString() === req.user._id.toString()
+        r => r.student && r.student.toString() === req.user._id.toString()
       );
 
-      if (record && courseStats[log.course._id.toString()]) {
+      if (record && courseStats[courseIdStr]) {
         totalClasses++;
-        courseStats[log.course._id.toString()].total++;
+        courseStats[courseIdStr].total++;
 
         if (record.status === 'present') {
           presentClasses++;
-          courseStats[log.course._id.toString()].present++;
+          courseStats[courseIdStr].present++;
         }
       }
     });

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const Course = require('../models/Course');
 const Attendance = require('../models/Attendance');
@@ -47,6 +48,10 @@ router.get('/pending-faculty', async (req, res) => {
 // @desc    Approve faculty member, generate Registration Number & activate account
 router.post('/approve-faculty/:id', async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid faculty ID format.' });
+    }
+
     const faculty = await User.findById(req.params.id);
 
     if (!faculty || faculty.role !== 'faculty') {
@@ -59,13 +64,18 @@ router.post('/approve-faculty/:id', async (req, res) => {
 
     // Generate unique Registration Number e.g. FAC-2026-1025
     const count = await User.countDocuments({ role: 'faculty', isApproved: true });
-    const regNumber = req.body.customRegNumber || `FAC-2026-${(1001 + count)}`;
+    const regNumber = (req.body.customRegNumber && typeof req.body.customRegNumber === 'string')
+      ? req.body.customRegNumber.trim()
+      : `FAC-2026-${(1001 + count)}`;
 
     faculty.isApproved = true;
     faculty.regNumber = regNumber;
     
     // Optional password update by admin if provided
-    if (req.body.newPassword) {
+    if (req.body.newPassword && typeof req.body.newPassword === 'string') {
+      if (req.body.newPassword.length < 6) {
+        return res.status(400).json({ success: false, message: 'New password must be at least 6 characters.' });
+      }
       faculty.password = req.body.newPassword;
     }
 
@@ -92,6 +102,10 @@ router.post('/approve-faculty/:id', async (req, res) => {
 // @desc    Reject and delete pending faculty registration
 router.delete('/reject-faculty/:id', async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid faculty ID format.' });
+    }
+
     const faculty = await User.findById(req.params.id);
     if (!faculty || faculty.role !== 'faculty') {
       return res.status(404).json({ success: false, message: 'Faculty member not found.' });
@@ -109,7 +123,13 @@ router.delete('/reject-faculty/:id', async (req, res) => {
 router.get('/users', async (req, res) => {
   try {
     const { role } = req.query;
-    const filter = role ? { role } : {};
+    const filter = {};
+
+    // Strict role enum validation to prevent NoSQL query operator injection
+    if (role && typeof role === 'string' && ['student', 'faculty', 'admin'].includes(role.trim())) {
+      filter.role = role.trim();
+    }
+
     const users = await User.find(filter).select('-password').sort({ createdAt: -1 });
 
     res.json({ success: true, count: users.length, data: users });

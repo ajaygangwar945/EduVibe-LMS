@@ -13,8 +13,11 @@ RUN npm install --production
 # Copy backend source code
 COPY . .
 
-# Ensure uploads folder exists inside container
-RUN mkdir -p uploads
+# Ensure uploads folder exists inside container and has correct permissions
+RUN mkdir -p uploads && chown -R node:node /app
+
+# Switch to non-root user for container security
+USER node
 
 # Expose backend port
 EXPOSE 5000

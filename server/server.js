@@ -49,18 +49,34 @@ app.get('/metrics', async (req, res) => {
 });
 
 // -------------------------------------------------------------
-// Core Middleware
+// Security & Core Middleware
 // -------------------------------------------------------------
+app.disable('x-powered-by'); // Hide Express signature
+
+// Security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '0');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded PDFs and Videos statically
-app.use('/uploads', express.static(uploadsPath));
+// Safe JSON body parsing limits to prevent memory exhaustion / DoS
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Serve uploaded PDFs and Videos statically with security protections
+app.use('/uploads', express.static(uploadsPath, {
+  dotfiles: 'deny',
+  maxAge: '1d',
+}));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -78,6 +94,15 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/faculty', require('./routes/faculty'));
 app.use('/api/student', require('./routes/student'));
+
+// Centralized error handler to prevent internal trace exposure
+app.use((err, req, res, next) => {
+  console.error('[Unhandled Server Error]:', err.message);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'An unexpected server error occurred',
+  });
+});
 
 // -------------------------------------------------------------
 // Database Connection & Auto-Seed Function

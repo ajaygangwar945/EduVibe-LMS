@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Course = require('../models/Course');
 const Attendance = require('../models/Attendance');
 const Quiz = require('../models/Quiz');
@@ -55,13 +56,22 @@ router.post('/courses', async (req, res) => {
 // @desc    Upload lecture PDF or Video to a course
 router.post('/courses/:id/upload-material', upload.single('file'), async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid course ID format.' });
+    }
+
     const course = await Course.findById(req.params.id);
     if (!course) {
       return res.status(404).json({ success: false, message: 'Course not found.' });
     }
 
+    // IDOR protection: Verify faculty owns this course or is admin
+    if (req.user.role !== 'admin' && course.faculty.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to upload materials to this course.' });
+    }
+
     if (!req.file) {
-      return res.status(400).json({ success: false, message: 'Please select a PDF or Video file to upload.' });
+      return res.status(400).json({ success: false, message: 'Please select a valid PDF, Document, or Video file to upload.' });
     }
 
     const ext = req.file.originalname.split('.').pop().toLowerCase();
@@ -69,7 +79,9 @@ router.post('/courses/:id/upload-material', upload.single('file'), async (req, r
     const fileType = isVideo ? 'video' : 'pdf';
 
     const fileUrl = `/uploads/${req.file.filename}`;
-    const materialTitle = req.body.title || req.file.originalname;
+    const materialTitle = (req.body.title && typeof req.body.title === 'string')
+      ? req.body.title.trim()
+      : req.file.originalname;
 
     course.materials.push({
       title: materialTitle,
@@ -94,9 +106,18 @@ router.post('/courses/:id/upload-material', upload.single('file'), async (req, r
 // @desc    Get enrolled students for a specific course
 router.get('/courses/:id/students', async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid course ID format.' });
+    }
+
     const course = await Course.findById(req.params.id).populate('enrolledStudents', 'name email regNumber department phone');
     if (!course) {
       return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+
+    // IDOR protection: Verify faculty owns this course or is admin
+    if (req.user.role !== 'admin' && course.faculty.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to view student roster for this course.' });
     }
 
     res.json({ success: true, data: course.enrolledStudents });
@@ -112,7 +133,21 @@ router.post('/attendance', async (req, res) => {
     const { courseId, date, records } = req.body;
 
     if (!courseId || !date || !records || !Array.isArray(records)) {
-      return res.status(400).json({ success: false, message: 'Please provide courseId, date, and student records.' });
+      return res.status(400).json({ success: false, message: 'Please provide courseId, date, and student records array.' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return res.status(400).json({ success: false, message: 'Invalid course ID format.' });
+    }
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+
+    // IDOR protection: Verify faculty owns this course or is admin
+    if (req.user.role !== 'admin' && course.faculty.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to mark attendance for this course.' });
     }
 
     // Check if attendance already exists for this date and course
@@ -140,6 +175,19 @@ router.post('/attendance', async (req, res) => {
 // @desc    Get all attendance logs for a course
 router.get('/attendance/:courseId', async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.courseId)) {
+      return res.status(400).json({ success: false, message: 'Invalid course ID format.' });
+    }
+
+    const course = await Course.findById(req.params.courseId);
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+
+    if (req.user.role !== 'admin' && course.faculty.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to view attendance logs for this course.' });
+    }
+
     const logs = await Attendance.find({ course: req.params.courseId })
       .populate('records.student', 'name regNumber email')
       .sort({ date: -1 });
@@ -156,15 +204,29 @@ router.post('/quizzes', async (req, res) => {
   try {
     const { title, courseId, durationMinutes, questions } = req.body;
 
-    if (!title || !courseId || !questions || questions.length === 0) {
+    if (!title || !courseId || !questions || !Array.isArray(questions) || questions.length === 0) {
       return res.status(400).json({ success: false, message: 'Please provide title, course, and at least one question.' });
     }
 
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return res.status(400).json({ success: false, message: 'Invalid course ID format.' });
+    }
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+
+    // IDOR protection: Verify faculty owns this course or is admin
+    if (req.user.role !== 'admin' && course.faculty.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to create quizzes for this course.' });
+    }
+
     const quiz = await Quiz.create({
-      title,
+      title: title.trim(),
       course: courseId,
       faculty: req.user._id,
-      durationMinutes: durationMinutes || 15,
+      durationMinutes: Number(durationMinutes) || 15,
       questions,
     });
 
@@ -198,15 +260,29 @@ router.post('/assignments', upload.single('attachment'), async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please provide title, course, and due date.' });
     }
 
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return res.status(400).json({ success: false, message: 'Invalid course ID format.' });
+    }
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+
+    // IDOR protection: Verify faculty owns this course or is admin
+    if (req.user.role !== 'admin' && course.faculty.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to create assignments for this course.' });
+    }
+
     const fileAttachmentUrl = req.file ? `/uploads/${req.file.filename}` : '';
 
     const assignment = await Assignment.create({
-      title,
-      description,
+      title: title.trim(),
+      description: typeof description === 'string' ? description.trim() : '',
       course: courseId,
       faculty: req.user._id,
       dueDate,
-      maxMarks: maxMarks || 100,
+      maxMarks: Number(maxMarks) || 100,
       fileAttachmentUrl,
     });
 
@@ -236,10 +312,24 @@ router.get('/assignments', async (req, res) => {
 router.post('/assignments/:assignmentId/grade/:submissionId', async (req, res) => {
   try {
     const { marks, feedback } = req.body;
-    const assignment = await Assignment.findById(req.params.assignmentId);
 
+    if (!mongoose.Types.ObjectId.isValid(req.params.assignmentId) || !mongoose.Types.ObjectId.isValid(req.params.submissionId)) {
+      return res.status(400).json({ success: false, message: 'Invalid assignment or submission ID format.' });
+    }
+
+    const assignment = await Assignment.findById(req.params.assignmentId);
     if (!assignment) {
       return res.status(404).json({ success: false, message: 'Assignment not found.' });
+    }
+
+    // IDOR protection: Verify faculty owns this assignment or is admin
+    if (req.user.role !== 'admin' && assignment.faculty.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to grade this assignment.' });
+    }
+
+    const numericMarks = Number(marks);
+    if (isNaN(numericMarks) || numericMarks < 0 || numericMarks > assignment.maxMarks) {
+      return res.status(400).json({ success: false, message: `Marks must be a valid number between 0 and ${assignment.maxMarks}.` });
     }
 
     const submission = assignment.submissions.id(req.params.submissionId);
@@ -247,8 +337,8 @@ router.post('/assignments/:assignmentId/grade/:submissionId', async (req, res) =
       return res.status(404).json({ success: false, message: 'Submission not found.' });
     }
 
-    submission.marks = marks;
-    submission.feedback = feedback || '';
+    submission.marks = numericMarks;
+    submission.feedback = typeof feedback === 'string' ? feedback.trim() : '';
 
     await assignment.save();
 

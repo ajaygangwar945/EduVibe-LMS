@@ -4,21 +4,58 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
 
+// In-memory rate limiting against brute-force login attacks
+const loginAttempts = new Map();
+const rateLimitAuth = (req, res, next) => {
+  const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes
+  const maxAttempts = 20;
+
+  const record = loginAttempts.get(ip) || { count: 0, resetTime: now + windowMs };
+  if (now > record.resetTime) {
+    record.count = 0;
+    record.resetTime = now + windowMs;
+  }
+
+  if (record.count >= maxAttempts) {
+    return res.status(429).json({
+      success: false,
+      message: 'Too many authentication attempts from this IP. Please wait 15 minutes before trying again.',
+    });
+  }
+
+  record.count++;
+  loginAttempts.set(ip, record);
+  next();
+};
+
 // Helper function to generate JWT token
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'eduvibe_secret', {
+  return jwt.sign({ id }, process.env.JWT_SECRET || 'eduvibe_docker_jwt_key_2026', {
     expiresIn: '7d',
   });
 };
 
 // @route   POST /api/auth/register-student
 // @desc    Register a new student account (immediately active)
-router.post('/register-student', async (req, res) => {
+router.post('/register-student', rateLimitAuth, async (req, res) => {
   try {
     const { name, email, password, phone, address, department, courseName } = req.body;
 
+    // Strict type check to prevent NoSQL operator injection
+    if (!name || typeof name !== 'string' || !email || typeof email !== 'string' || !password || typeof password !== 'string') {
+      return res.status(400).json({ success: false, message: 'Please provide valid name, email, and password.' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'Email is already registered.' });
     }
@@ -28,14 +65,14 @@ router.post('/register-student', async (req, res) => {
     const regNumber = `STU-2026-${randomSuffix}`;
 
     const student = await User.create({
-      name,
-      email,
+      name: name.trim(),
+      email: cleanEmail,
       password,
       role: 'student',
-      phone: phone || '',
-      address: address || '',
-      department: department || 'Computer Science',
-      courseName: courseName || '',
+      phone: typeof phone === 'string' ? phone.trim() : '',
+      address: typeof address === 'string' ? address.trim() : '',
+      department: typeof department === 'string' ? department.trim() : 'Computer Science',
+      courseName: typeof courseName === 'string' ? courseName.trim() : '',
       regNumber,
       isApproved: true,
     });
@@ -63,24 +100,35 @@ router.post('/register-student', async (req, res) => {
 
 // @route   POST /api/auth/register-faculty
 // @desc    Register a faculty member (pending admin approval)
-router.post('/register-faculty', async (req, res) => {
+router.post('/register-faculty', rateLimitAuth, async (req, res) => {
   try {
     const { name, email, password, department, courseName, address, phone } = req.body;
 
-    const existingUser = await User.findOne({ email });
+    // Strict type check to prevent NoSQL operator injection
+    if (!name || typeof name !== 'string' || !email || typeof email !== 'string' || !password || typeof password !== 'string') {
+      return res.status(400).json({ success: false, message: 'Please provide valid name, email, and password.' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'Email is already registered.' });
     }
 
     const faculty = await User.create({
-      name,
-      email,
+      name: name.trim(),
+      email: cleanEmail,
       password,
       role: 'faculty',
-      department: department || 'Computer Science',
-      courseName: courseName || '',
-      address: address || '',
-      phone: phone || '',
+      department: typeof department === 'string' ? department.trim() : 'Computer Science',
+      courseName: typeof courseName === 'string' ? courseName.trim() : '',
+      address: typeof address === 'string' ? address.trim() : '',
+      phone: typeof phone === 'string' ? phone.trim() : '',
       isApproved: false, // Requires Admin Approval
     });
 
@@ -104,21 +152,23 @@ router.post('/register-faculty', async (req, res) => {
 
 // @route   POST /api/auth/login
 // @desc    Login for Student, Faculty, or Admin
-router.post('/login', async (req, res) => {
+router.post('/login', rateLimitAuth, async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Please provide email and password.' });
+    if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
+      return res.status(400).json({ success: false, message: 'Please provide valid email and password strings.' });
     }
 
-    const user = await User.findOne({ email });
+    const cleanEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email: cleanEmail });
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
 
     // Role verification
-    if (role && user.role !== role) {
+    if (role && typeof role === 'string' && user.role !== role.trim()) {
       return res.status(403).json({
         success: false,
         message: `Account found, but role does not match. Please log in as '${user.role}'.`,
