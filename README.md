@@ -205,21 +205,113 @@ docker compose --profile monitoring down
 
 ### Option B: Run Manually with Node.js & npm (Development Mode)
 
-#### 1. Start Backend:
-```bash
-cd server
-npm install
-npm run dev
-# Backend starts at http://localhost:5000
-```
+Manual mode gives you instant hot-reloading for rapid code edits.
 
-#### 2. Start Frontend:
-```bash
-cd ../client
-npm install
-npm run dev
-# Frontend starts at http://localhost:5173
-```
+#### 1. Prerequisites
+- **Node.js** (v18+ or v20+) and **npm**
+- **MongoDB** running locally on Windows (Port `27017`) or via Docker (`docker compose up -d mongo`)
+- *(Optional)* **MongoDB Compass** for visual database inspection
+
+---
+
+#### 2. Start the Database (MongoDB)
+Ensure MongoDB is running on your machine:
+- **Windows Local Service**: Make sure `MongoDB Server` service is running in Windows Services (or via MongoDB Compass).
+- **Or via Docker (Database only)**:
+  ```bash
+  docker compose up -d mongo
+  ```
+
+---
+
+#### 3. Start the Backend API (Terminal 1)
+1. Open a terminal and navigate to `server/`:
+   ```powershell
+   cd server
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create or verify the `server/.env` file:
+   ```env
+   PORT=5000
+   MONGO_URI=mongodb://127.0.0.1:27017/eduvibe
+   JWT_SECRET=eduvibe_super_secret_jwt_key_2026
+   ADMIN_EMAIL=admin@eduvibe.com
+   ADMIN_PASSWORD=admin123
+   CLIENT_URL=http://localhost:5173
+   ```
+4. Start the backend with Nodemon:
+   ```bash
+   npm run dev
+   ```
+   **Output:**
+   ```text
+   🚀 EduVibe Backend running on port 5000
+   [Database] MongoDB connected successfully to mongodb://127.0.0.1:27017/eduvibe
+   [Seed] Default Admin account created (admin@eduvibe.com)
+   ```
+
+---
+
+#### 4. Start the React Frontend (Terminal 2)
+1. Open a second terminal and navigate to `client/`:
+   ```powershell
+   cd client
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the Vite development server:
+   ```bash
+   npm run dev
+   ```
+   **Output:**
+   ```text
+   VITE v5.x.x  ready in 300 ms
+   ➜  Local:   http://localhost:5173/
+   ```
+4. Open **[http://localhost:5173](http://localhost:5173)** in your browser. *(Vite automatically proxies all `/api` and `/uploads` requests directly to `http://localhost:5000`)*.
+
+---
+
+#### 5. Inspect Data in MongoDB Compass
+1. Open **MongoDB Compass**.
+2. Connect to URI: `mongodb://localhost:27017/`
+3. Click the green **Connect** button.
+4. On the left sidebar, click **`eduvibe`** to explore all collections:
+   - `users` — Students, Faculty, and Admin accounts
+   - `courses` — Created courses & syllabus notes
+   - `quizzes` — Interactive quiz questions & submissions
+   - `attendances` — Daily attendance logs
+   - `assignments` — Homework & project submissions
+
+---
+
+#### 6. Connect Local Prometheus & Grafana (Optional)
+1. Add the backend target to your local `C:\Prometheus\prometheus.yml`:
+   ```yaml
+     - job_name: "eduvibe-backend"
+       scrape_interval: 5s
+       metrics_path: "/metrics"
+       static_configs:
+         - targets: ["localhost:5000"]
+   ```
+2. Start Prometheus:
+   ```powershell
+   cd C:\Prometheus
+   .\prometheus.exe --config.file=prometheus.yml
+   ```
+3. Open **Grafana** at **[http://localhost:3000](http://localhost:3000)**:
+   - Add data source ➔ **Prometheus** (`http://localhost:9090`)
+   - Query `http_request_duration_seconds_count` to watch live API requests.
+
+---
+
+#### 7. How to Stop Local Development
+Press `Ctrl + C` in both the Backend and Frontend terminal windows.
 
 ---
 
