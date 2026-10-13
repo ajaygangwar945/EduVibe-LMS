@@ -11,6 +11,13 @@
 
 ---
 
+## 🚀 View Live Site
+The project is live and accessible online.
+
+🔗 **[Live Website](https://edu-vibe-lms.vercel.app/)**
+
+---
+
 ## 📌 Executive Summary
 
 **EduVibe** is an enterprise-grade, full-stack Academic & Learning Management Portal engineered for higher-education institutions. Built using modern web technologies (**React 18, Vite, Node.js, Express, MongoDB 7.0**), EduVibe provides secure, tailored digital workflows for three primary academic roles: **Students**, **Faculty**, and **Institutional Administrators**.
