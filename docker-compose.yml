@@ -54,7 +54,8 @@ services:
     container_name: eduvibe-backend
     restart: always
     ports:
-      - "5000:5000"
+      # Use port 5001 on host to prevent collision with local Node.js (which runs on 5000)
+      - "${BACKEND_PORT:-5001}:5000"
     environment:
       - PORT=5000
       - MONGO_URI=mongodb://mongo:27017/eduvibe
@@ -101,7 +102,8 @@ services:
     restart: always
     profiles: ["monitoring", "all"]
     ports:
-      - "9090:9090"
+      # Use port 9091 on host to prevent collision with local Windows Prometheus (which runs on 9090)
+      - "${PROMETHEUS_PORT:-9091}:9090"
     volumes:
       - ./devops/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     networks:

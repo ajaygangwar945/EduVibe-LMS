@@ -45,7 +45,7 @@ services:
     container_name: eduvibe-backend
     restart: always
     ports:
-      - "5000:5000"
+      - "${BACKEND_PORT:-5001}:5000"
     environment:
       - PORT=5000
       - MONGO_URI=mongodb://mongo:27017/eduvibe
@@ -86,7 +86,7 @@ services:
     restart: always
     profiles: ["monitoring", "all"]
     ports:
-      - "9090:9090"
+      - "${PROMETHEUS_PORT:-9091}:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     networks:
