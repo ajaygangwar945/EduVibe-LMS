@@ -1,31 +1,31 @@
 output "ec2_public_ip" {
-  description = "The public IP address of your EduVibe AWS EC2 server"
-  value       = aws_instance.eduvibe_server.public_ip
+  description = "The permanent static IP address of your EduVibe AWS EC2 server"
+  value       = aws_eip.eduvibe_eip.public_ip
 }
 
 output "ssh_command" {
   description = "Command to SSH into your EC2 server"
-  value       = "ssh ubuntu@${aws_instance.eduvibe_server.public_ip}"
+  value       = "ssh ubuntu@${aws_eip.eduvibe_eip.public_ip}"
 }
 
 output "frontend_url" {
   description = "Public URL to access the EduVibe React Web Portal"
-  value       = "http://${aws_instance.eduvibe_server.public_ip}:3005"
+  value       = "http://${aws_eip.eduvibe_eip.public_ip}:3005"
 }
 
 output "backend_api_url" {
   description = "Public URL for Node.js API"
-  value       = "http://${aws_instance.eduvibe_server.public_ip}:5000"
+  value       = "http://${aws_eip.eduvibe_eip.public_ip}:5000"
 }
 
 output "mongo_express_url" {
   description = "Public URL for MongoDB Visual Web Explorer"
-  value       = "http://${aws_instance.eduvibe_server.public_ip}:8081"
+  value       = "http://${aws_eip.eduvibe_eip.public_ip}:8081"
 }
 
 output "jenkins_url" {
   description = "Public URL for Jenkins CI/CD Dashboard"
-  value       = "http://${aws_instance.eduvibe_server.public_ip}:8080"
+  value       = "http://${aws_eip.eduvibe_eip.public_ip}:8080"
 }
 
 output "s3_bucket_name" {
