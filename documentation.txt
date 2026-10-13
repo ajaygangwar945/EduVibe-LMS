@@ -1,0 +1,574 @@
+================================================================================
+EDUVIBE - NEXT-GEN ACADEMIC & LEARNING MANAGEMENT PORTAL
+COMPLETE TECHNICAL DOCUMENTATION & ARCHITECTURAL REFERENCE MANUAL
+================================================================================
+Author: Ajay Gangwar
+Project: EduVibe Academic & Learning Management Portal (LMS)
+Course: INT 377 - Cloud & DevOps Architecture (SEM 6)
+Repository: https://github.com/ajaygangwar945/EduVibe-LMS
+Live Web Portal: https://edu-vibe-lms.vercel.app/
+================================================================================
+
+TABLE OF CONTENTS:
+--------------------------------------------------------------------------------
+1. PROJECT OVERVIEW & PURPOSE
+2. STEP-BY-STEP DEVELOPMENT JOURNEY (HOW THIS PROJECT WAS BUILT)
+3. TECHNOLOGY STACK & HOW TO USE EACH TECHNOLOGY
+   3.1. Frontend: React 18 & Vite
+   3.2. Backend: Node.js & Express.js
+   3.3. Database: MongoDB 7.0 & Mongoose ODM
+   3.4. Containerization: Docker & Docker Compose
+   3.5. Infrastructure as Code (IaC): Terraform
+   3.6. AWS Cloud Services (EC2, EIP, S3, CloudFront, ECR, CloudWatch, SNS, IAM)
+   3.7. Global Edge Deployment: Vercel
+   3.8. Observability & Telemetry: Prometheus & Grafana
+   3.9. CI/CD Pipeline: Jenkins
+   3.10. Container Orchestration: Kubernetes
+4. FULL SYSTEM ARCHITECTURE & DATA FLOW
+5. THREE WAYS TO DEPLOY & RUN
+   5.1. Method 1: Local Development (Bare-Metal / npm)
+   5.2. Method 2: Docker Container Deployment (Docker Compose)
+   5.3. Method 3: Cloud Production Deployment (AWS + Vercel)
+6. COMPLETE REST API ENDPOINTS REFERENCE
+7. DATABASE SCHEMA & DATA MODELS
+8. DEFAULT DEMO CREDENTIALS & ACCESS
+9. SECURITY & DEVSECOPS PRACTICES
+10. TROUBLESHOOTING & MAINTENANCE CHEAT SHEET
+================================================================================
+
+
+================================================================================
+1. PROJECT OVERVIEW & PURPOSE
+================================================================================
+EduVibe is a full-stack, cloud-native Academic and Learning Management Portal
+designed to streamline everyday institutional tasks across three key roles:
+
+1. Students:
+   - View enrolled subjects, attendance records, and syllabus notes.
+   - Watch recorded lecture videos directly inside the browser.
+   - Download course PDF study materials.
+   - Take interactive, auto-graded multiple-choice quizzes with live feedback.
+   - Submit assignment files in PDF format.
+   - Monitor attendance gauge with alerts when falling below the 75% threshold.
+
+2. Faculty:
+   - Create and manage academic courses and view enrolled student rosters.
+   - Upload lecture materials (PDF syllabus and .mp4 / .webm video recordings).
+   - Record daily student attendance (Present / Absent) by date and subject.
+   - Build custom quizzes with dynamic question counts, timers, and scoring.
+   - Review and evaluate student homework submissions with marks and comments.
+
+3. Institutional Administrator:
+   - Real-time dashboard with key metrics (total students, faculty, courses).
+   - Review and approve pending faculty account registrations.
+   - Auto-generate official institutional IDs (e.g., FAC-2026-XXXX, STU-2026-XXXX).
+   - Maintain user directory and overall system integrity.
+
+
+================================================================================
+2. STEP-BY-STEP DEVELOPMENT JOURNEY (HOW THIS PROJECT WAS BUILT)
+================================================================================
+Phase 1: Requirements Gathering & System Design
+- Identified educational pain points: fragmented systems for video lectures,
+  manual paper attendance, separate quiz tools, and high cloud hosting costs.
+- Defined a 3-role permission matrix: Student, Faculty, Admin.
+- Drafted the hybrid cloud architecture: High-speed edge CDN for frontend +
+  resilient containerized backend on AWS EC2 within the AWS Free Tier.
+
+Phase 2: Database Schema & Backend Architecture
+- Initialized Node.js project with Express framework (`server/`).
+- Designed Mongoose schemas: User, Course, Attendance, Quiz, Assignment.
+- Implemented secure JWT authentication with Bcrypt password hashing (10 salt rounds).
+- Configured Multer middleware for secure file uploads with MIME-type validation.
+- Added Prometheus telemetry (`prom-client`) exposing `/metrics` endpoint.
+
+Phase 3: Modern Frontend Development
+- Initialized React 18 Single Page Application (SPA) using Vite (`client/`).
+- Built custom CSS design system using glassmorphic UI cards, neon accents,
+  and dark-mode typography (no bulky UI frameworks).
+- Created AuthContext for global JWT session state and route protection.
+- Built separate role-based dashboards: StudentDashboard, FacultyDashboard,
+  and AdminDashboard with sub-tabs for quizzes, attendance, and videos.
+
+Phase 4: Containerization & Local Orchestration
+- Wrote multi-stage `Dockerfile` for the frontend (Vite build + Nginx alpine).
+- Wrote lightweight `Dockerfile` for the backend (Node 18 alpine, non-root user).
+- Created root `docker-compose.yml` linking:
+  * Backend API (Port 5000)
+  * React Frontend (Port 3005)
+  * MongoDB 7.0 Engine (Port 27018 internal)
+  * Mongo Express Web GUI (Port 8081)
+  * Prometheus Metrics Scraper (Port 9090)
+  * Grafana Analytics Dashboard (Port 3001)
+
+Phase 5: Cloud Infrastructure as Code (Terraform)
+- Created Terraform modules under `devops/terraform/` to automate all AWS resources:
+  * EC2 t2.micro instance with 30 GB EBS gp3 encrypted storage.
+  * AWS Elastic IP (EIP) for permanent static addressing.
+  * Amazon S3 bucket with AES-256 encryption for media storage.
+  * Amazon CloudFront CDN distribution with Origin Access Control (OAC).
+  * Amazon ECR container registries for Docker image builds.
+  * Amazon CloudWatch metric alarms + SNS email notifications.
+  * Security groups restricting ports to minimum required services.
+
+Phase 6: Production Edge Deployment (Vercel)
+- Deployed frontend React SPA to Vercel's global edge network.
+- Configured `client/vercel.json` to reverse-proxy `/api/*` and `/uploads/*`
+  directly to the permanent AWS Elastic IP on port 5000.
+- Resolved CORS and SSL mixed-content issues seamlessly at the edge layer.
+
+Phase 7: CI/CD Pipeline & Kubernetes Manifests
+- Created `Jenkinsfile` for automated multi-stage builds (Test, Docker Build,
+  ECR Push, Rolling Deployment).
+- Wrote Kubernetes manifests (`devops/k8s/`) including Deployments, Services,
+  PersistentVolumeClaims, ConfigMaps, Secrets, and Ingress controllers.
+
+
+================================================================================
+3. TECHNOLOGY STACK & HOW TO USE EACH TECHNOLOGY
+================================================================================
+
+--------------------------------------------------------------------------------
+3.1. Frontend: React 18 & Vite
+--------------------------------------------------------------------------------
+- What it does: Delivers a responsive, blazing-fast Single Page Application (SPA).
+- Key files:
+  * `client/src/App.jsx`: Main routing table with ProtectedRoute wrappers.
+  * `client/src/context/AuthContext.jsx`: Handles login, token storage, and logout.
+  * `client/src/pages/`: Role-specific view components.
+  * `client/src/index.css`: Custom glassmorphism design tokens and styling.
+  * `client/vite.config.js`: Development server config with local API proxying.
+- How to use in development:
+  1. Open terminal: `cd client`
+  2. Install modules: `npm install`
+  3. Start dev server: `npm run dev`
+  4. Access at: `http://localhost:5173`
+
+--------------------------------------------------------------------------------
+3.2. Backend: Node.js & Express.js
+--------------------------------------------------------------------------------
+- What it does: RESTful API server handling business logic, authentication,
+  database operations, file uploads, and Prometheus metrics.
+- Key files:
+  * `server/server.js`: Express app initialization, CORS, routes, and `/metrics`.
+  * `server/middleware/auth.js`: JWT token verification and RBAC authorization.
+  * `server/middleware/upload.js`: Multer configuration for PDFs and video files.
+  * `server/routes/`: `auth.js`, `student.js`, `faculty.js`, `admin.js`.
+- How to use in development:
+  1. Open terminal: `cd server`
+  2. Install modules: `npm install`
+  3. Start with nodemon: `npm run dev`
+  4. Server listens on: `http://localhost:5000`
+
+--------------------------------------------------------------------------------
+3.3. Database: MongoDB 7.0 & Mongoose ODM
+--------------------------------------------------------------------------------
+- What it does: Document-oriented NoSQL database storing user profiles,
+  course metadata, attendance logs, quizzes, and assignment submissions.
+- Key files:
+  * `server/models/User.js`: Schema for Student, Faculty, and Admin accounts.
+  * `server/models/Course.js`: Subjects, syllabus files, and lecture videos.
+  * `server/models/Attendance.js`: Per-subject, per-date student presence logs.
+  * `server/models/Quiz.js`: Quizzes, questions, options, and student answers.
+  * `server/models/Assignment.js`: Homework prompts and student PDF uploads.
+- Visual Inspection:
+  * MongoDB Compass: Connect to `mongodb://localhost:27017/eduvibe`
+  * Mongo Express (Docker): Open `http://localhost:8081` in browser.
+
+--------------------------------------------------------------------------------
+3.4. Containerization: Docker & Docker Compose
+--------------------------------------------------------------------------------
+- What it does: Packages frontend, backend, database, and telemetry into
+  isolated, portable containers that run identically anywhere.
+- Key files:
+  * `client/Dockerfile`: Multi-stage build (Node build stage -> Nginx production).
+  * `server/Dockerfile`: Minimal Node 18 alpine image running as non-root user.
+  * `docker-compose.yml`: Root multi-container orchestration.
+- Key Commands:
+  * Start App Only: `docker compose up -d`
+  * Start App + Monitoring: `docker compose --profile monitoring up -d`
+  * View Logs: `docker compose logs -f`
+  * Stop Cleanly: `docker compose --profile monitoring down`
+
+--------------------------------------------------------------------------------
+3.5. Infrastructure as Code (IaC): Terraform
+--------------------------------------------------------------------------------
+- What it does: Declarative infrastructure provisioning on AWS. Automates the
+  creation of compute, storage, security, and networking in under 2 minutes.
+- Key files (`devops/terraform/`):
+  * `main.tf`: AWS provider configuration and Ubuntu AMI lookup.
+  * `ec2.tf`: EC2 instance definition and Elastic IP attachment.
+  * `s3.tf`: S3 bucket with AES-256 server-side encryption.
+  * `cloudfront.tf`: CloudFront CDN with Origin Access Control.
+  * `ecr.tf`: Private Docker container registries.
+  * `cloudwatch.tf` & `sns.tf`: Monitoring alarms and email notifications.
+  * `security_groups.tf`: Inbound port firewall rules.
+- How to use:
+  1. `cd devops/terraform`
+  2. `terraform init`     (Download provider plugins)
+  3. `terraform plan`     (Preview changes)
+  4. `terraform apply`    (Deploy infrastructure to AWS)
+  5. `terraform destroy`  (Tear down everything to keep cost at $0)
+
+--------------------------------------------------------------------------------
+3.6. AWS Cloud Services (Detailed Roles)
+--------------------------------------------------------------------------------
+1. Amazon EC2:
+   - Instance Type: t2.micro (1 vCPU, 1 GB RAM, Ubuntu 22.04 LTS).
+   - Role: Runs Docker engine hosting backend, database, and monitoring containers.
+2. AWS Elastic IP (EIP):
+   - Role: Static public IPv4 address. Prevents IP address changes when the
+     instance restarts, keeping Vercel API reverse-proxy routes stable.
+3. Amazon S3:
+   - Bucket: `eduvibe-storage-*`
+   - Role: Secure cloud storage for lecture PDFs and video files.
+4. Amazon CloudFront:
+   - Domain: `https://d1dionuk6xtudv.cloudfront.net`
+   - Role: Global CDN edge caching. Streams videos and PDFs with low latency.
+5. Amazon ECR:
+   - Repositories: `eduvibe-backend`, `eduvibe-frontend`
+   - Role: Stores versioned Docker container images for CI/CD automation.
+6. Amazon CloudWatch:
+   - Metric Alarm: Triggers when EC2 CPU utilization exceeds 85%.
+7. Amazon SNS:
+   - Topic: `eduvibe-alarms`
+   - Role: Sends instant emergency alert emails to administrators.
+8. AWS IAM & Security Groups:
+   - Role: Least-privilege IAM roles and firewall rules filtering ports
+     (80, 5000, 8081, 9090, 3001, 22).
+
+--------------------------------------------------------------------------------
+3.7. Global Edge Deployment: Vercel
+--------------------------------------------------------------------------------
+- Live URL: `https://edu-vibe-lms.vercel.app/`
+- What it does: Hosts the React frontend across 100+ global edge locations.
+- Key file (`client/vercel.json`):
+  ```json
+  {
+    "rewrites": [
+      {
+        "source": "/api/:path*",
+        "destination": "http://<YOUR_AWS_ELASTIC_IP>:5000/api/:path*"
+      },
+      {
+        "source": "/uploads/:path*",
+        "destination": "http://<YOUR_AWS_ELASTIC_IP>:5000/uploads/:path*"
+      },
+      {
+        "source": "/(.*)",
+        "destination": "/index.html"
+      }
+    ]
+  }
+  ```
+- Benefits: Fast edge caching, automatic SSL, zero CORS friction, and no
+  mixed-content browser blocking.
+
+--------------------------------------------------------------------------------
+3.8. Observability & Telemetry: Prometheus & Grafana
+--------------------------------------------------------------------------------
+- Prometheus (Port 9090):
+  * Scrapes `/metrics` on the backend every 5 seconds.
+  * Collects HTTP request counts, response duration histograms, and memory stats.
+- Grafana (Port 3000 / 3001):
+  * Connects to Prometheus as a time-series data source.
+  * Visualizes real-time API latency, traffic spikes, and server resource usage.
+
+--------------------------------------------------------------------------------
+3.9. CI/CD Pipeline: Jenkins
+--------------------------------------------------------------------------------
+- Pipeline file: `Jenkinsfile`
+- Automated stages:
+  1. Code Checkout from GitHub repository.
+  2. Automated testing and linting.
+  3. Docker image build for frontend and backend.
+  4. Authentication and push to Amazon ECR.
+  5. Rolling deployment update on the AWS EC2 host.
+
+--------------------------------------------------------------------------------
+3.10. Container Orchestration: Kubernetes
+--------------------------------------------------------------------------------
+- Manifests located in: `devops/k8s/`
+- Resources defined:
+  * `backend.yaml`: Node.js API Deployment and ClusterIP Service.
+  * `frontend.yaml`: React Nginx Deployment and NodePort/LoadBalancer Service.
+  * `mongo.yaml`: MongoDB Deployment with PersistentVolumeClaim (PVC).
+  * `configmap.yaml` & `secrets.yaml`: Centralized environment configurations.
+  * `ingress.yaml`: NGINX Ingress Controller routing rules.
+
+
+================================================================================
+4. FULL SYSTEM ARCHITECTURE & DATA FLOW
+================================================================================
+Client Request Lifecycle:
+1. User opens browser and navigates to `https://edu-vibe-lms.vercel.app/`.
+2. Vercel Edge CDN immediately serves the cached React 18 production build.
+3. User logs in with email and password:
+   - Request sent to `/api/auth/login`.
+   - Vercel reverse proxy intercepts `/api/*` and routes it to
+     `http://<YOUR_AWS_ELASTIC_IP>:5000/api/auth/login`.
+   - AWS Security Group allows inbound traffic on port 5000.
+   - Node.js backend queries MongoDB, compares Bcrypt password hashes, and
+     returns a signed JWT token with user role and profile details.
+4. Client stores JWT in localStorage and attaches it to subsequent API calls.
+5. Faculty uploads lecture material:
+   - Multer validates file type, sanitizes name, and stores it in uploads volume.
+   - File metadata saved in MongoDB.
+   - Assets stream globally to students via Amazon CloudFront CDN.
+6. Telemetry & Monitoring:
+   - Every API request records latency metrics in `prom-client`.
+   - Prometheus server scrapes `http://localhost:5000/metrics` every 5 seconds.
+   - Grafana dashboard queries Prometheus to display live telemetry.
+
+
+================================================================================
+5. THREE WAYS TO DEPLOY & RUN
+================================================================================
+
+--------------------------------------------------------------------------------
+5.1. Method 1: Local Development (Bare-Metal / npm)
+--------------------------------------------------------------------------------
+Best for rapid code editing with instant hot reload.
+
+Prerequisites:
+- Node.js 18+ and npm installed
+- Local MongoDB running on port 27017
+
+Step 1: Configure Environment Variables
+Create `server/.env`:
+```env
+PORT=5000
+MONGO_URI=mongodb://127.0.0.1:27017/eduvibe
+JWT_SECRET=your_secret_key_here
+ADMIN_EMAIL=admin@eduvibe.com
+ADMIN_PASSWORD=admin123
+CLIENT_URL=http://localhost:5173
+```
+
+Step 2: Start MongoDB
+Ensure MongoDB Windows service is active or run via Docker:
+`docker compose up -d mongo`
+
+Step 3: Start Backend API (Terminal 1)
+```powershell
+cd server
+npm install
+npm run dev
+```
+Listens on: `http://localhost:5000`
+
+Step 4: Start Frontend (Terminal 2)
+```powershell
+cd client
+npm install
+npm run dev
+```
+Listens on: `http://localhost:5173`
+
+Step 5: How to Stop
+Press `Ctrl + C` in both terminal windows.
+
+--------------------------------------------------------------------------------
+5.2. Method 2: Docker Container Deployment (Docker Compose)
+--------------------------------------------------------------------------------
+Best for running the complete containerized stack in one command.
+
+Prerequisites:
+- Docker Desktop installed and running.
+
+Step 1: Start Core Application (Frontend + Backend + MongoDB + Mongo Express)
+```bash
+docker compose up -d
+```
+
+Step 2: Start Application + Full Monitoring Stack (Prometheus + Grafana)
+```bash
+docker compose --profile monitoring up -d
+```
+
+Step 3: Access Running Containers
+- React Frontend: `http://localhost:3005`
+- Backend API Health: `http://localhost:5000/api/health`
+- Mongo Express GUI: `http://localhost:8081`
+- Prometheus Server: `http://localhost:9090`
+- Grafana Analytics: `http://localhost:3001`
+
+Step 4: Stop Containers
+```bash
+docker compose --profile monitoring down
+```
+(Data is safely preserved in `mongo_data` and `uploads_data` volumes).
+
+--------------------------------------------------------------------------------
+5.3. Method 3: Cloud Production Deployment (AWS + Vercel)
+--------------------------------------------------------------------------------
+Live production deployment combining Vercel Edge with AWS EC2.
+
+Step 1: Provision AWS Infrastructure via Terraform
+```bash
+cd devops/terraform
+terraform init
+terraform plan
+terraform apply -auto-approve
+```
+Outputs allocated AWS Elastic IP and S3 / CloudFront resource URLs.
+
+Step 2: Deploy Frontend on Vercel
+1. Link GitHub repository to Vercel.
+2. Root directory: `client`
+3. Framework: Vite
+4. `client/vercel.json` automatically proxies API calls to AWS Elastic IP.
+5. Live link: `https://edu-vibe-lms.vercel.app/`
+
+Step 3: Launch Containers on AWS EC2
+1. SSH into EC2: `ssh -i <key.pem> ubuntu@<YOUR_AWS_ELASTIC_IP>`
+2. Clone repository: `git clone https://github.com/ajaygangwar945/EduVibe-LMS.git`
+3. Start stack: `cd EduVibe-LMS && docker compose --profile monitoring up -d`
+4. Verify health: `curl http://localhost:5000/api/health`
+
+Step 4: Cost Management / Teardown
+- Pause EC2: `aws ec2 stop-instances --instance-ids <INSTANCE_ID>`
+- Destroy everything: `cd devops/terraform && terraform destroy -auto-approve`
+
+
+================================================================================
+6. COMPLETE REST API ENDPOINTS REFERENCE
+================================================================================
+Base URL: `http://<YOUR_AWS_ELASTIC_IP>:5000/api`
+
+Authentication (`/api/auth`):
+- `POST /api/auth/register`       - Register new student / faculty account
+- `POST /api/auth/login`          - Authenticate user and issue JWT token
+- `GET  /api/auth/profile`        - Fetch current user profile (JWT required)
+
+Student Endpoints (`/api/student`):
+- `GET  /api/student/dashboard`   - Summary KPIs, enrolled courses, attendance
+- `GET  /api/student/courses`     - List all available courses
+- `POST /api/student/enroll/:id`  - Enroll in a specific course
+- `GET  /api/student/quizzes`     - Fetch available course quizzes
+- `POST /api/student/quiz/submit` - Submit quiz answers for auto-grading
+- `POST /api/student/assignment`  - Upload homework submission (PDF)
+
+Faculty Endpoints (`/api/faculty`):
+- `GET  /api/faculty/dashboard`   - Faculty courses and student counts
+- `POST /api/faculty/courses`     - Create a new course
+- `POST /api/faculty/upload`      - Upload lecture video or syllabus PDF
+- `POST /api/faculty/attendance`  - Record daily attendance by date/subject
+- `POST /api/faculty/quiz`        - Create custom quiz with timer and questions
+- `POST /api/faculty/grade`       - Assign score and comments to submission
+
+Admin Endpoints (`/api/admin`):
+- `GET  /api/admin/dashboard`     - System-wide statistics and metrics
+- `GET  /api/admin/pending`       - List pending faculty registrations
+- `POST /api/admin/approve/:id`   - Approve faculty and issue FAC-XXXX ID
+- `GET  /api/admin/users`         - Directory of all registered users
+
+System & Observability:
+- `GET  /api/health`              - Server uptime and health status
+- `GET  /metrics`                 - Prometheus metrics scrape feed
+
+
+================================================================================
+7. DATABASE SCHEMA & DATA MODELS
+================================================================================
+1. User Model:
+   - `name`: String (Required)
+   - `email`: String (Unique, Required)
+   - `password`: String (Bcrypt hash)
+   - `role`: Enum ['student', 'faculty', 'admin']
+   - `regNo`: String (Auto-generated institutional ID: STU-XXXX / FAC-XXXX)
+   - `isApproved`: Boolean (Defaults to true for students, false for faculty)
+   - `department`: String
+
+2. Course Model:
+   - `title`: String (Required)
+   - `code`: String (Unique course code)
+   - `description`: String
+   - `faculty`: ObjectId (Ref: User)
+   - `enrolledStudents`: [ObjectId (Ref: User)]
+   - `syllabusUrl`: String (Path to uploaded PDF)
+   - `videos`: [{ title, videoUrl, duration }]
+
+3. Attendance Model:
+   - `course`: ObjectId (Ref: Course)
+   - `date`: Date
+   - `records`: [{ student: ObjectId, status: Enum ['present', 'absent'] }]
+
+4. Quiz Model:
+   - `title`: String
+   - `course`: ObjectId (Ref: Course)
+   - `durationMinutes`: Number
+   - `questions`: [{ questionText, options: [String], correctOptionIndex: Number, points: Number }]
+   - `submissions`: [{ student: ObjectId, score: Number, submittedAt: Date }]
+
+5. Assignment Model:
+   - `title`: String
+   - `course`: ObjectId (Ref: Course)
+   - `dueDate`: Date
+   - `submissions`: [{ student: ObjectId, fileUrl: String, score: Number, feedback: String }]
+
+
+================================================================================
+8. DEFAULT DEMO CREDENTIALS & ACCESS
+================================================================================
+Role: System Admin
+- Email: `admin@eduvibe.com`
+- Password: `admin123`
+- Scope: Approve faculty accounts, manage all users, review system KPIs.
+
+Role: Sample Faculty
+- Email: `robert.smith@eduvibe.com`
+- Password: `password123`
+- Scope: Create courses, mark attendance, upload videos/notes, create quizzes.
+
+Role: Student
+- Self-registration on login page.
+- Auto-generates roll number: `STU-2026-XXXX`.
+
+Database GUI (Mongo Express):
+- URL: `http://<YOUR_AWS_ELASTIC_IP>:8081`
+- Username: `admin`
+- Password: (Configured in `.env`)
+
+Analytics Dashboard (Grafana):
+- URL: `http://<YOUR_AWS_ELASTIC_IP>:3001`
+- Username: `admin`
+- Password: (Configured in `.env`)
+
+
+================================================================================
+9. SECURITY & DEVSECOPS PRACTICES
+================================================================================
+- NoSQL Injection Prevention: Strict type coercion on all user input.
+- Brute-Force Rate Limiting: Rate limiters on `/api/auth` endpoints.
+- IDOR Protection: Object-level authorization checks on all modifying actions.
+- File Upload Whitelisting: Strict MIME-type checking (.pdf, .mp4, .webm).
+- Container Security: Node.js container runs as unprivileged user `node`.
+- Secret Hygiene: `.dockerignore` and `.gitignore` prevent sensitive file leaks.
+- Cloud Encryption: Amazon S3 AES-256 server-side encryption and EBS gp3 encryption.
+- Network Isolation: MongoDB port 27017 is bound to internal container network.
+
+
+================================================================================
+10. TROUBLESHOOTING & MAINTENANCE CHEAT SHEET
+================================================================================
+Issue: Backend cannot connect to MongoDB locally
+Fix: Ensure local MongoDB service is running via Windows Services or run:
+     `docker compose up -d mongo`
+
+Issue: Port 5000 already in use
+Fix: Check running processes in PowerShell:
+     `Get-NetTCPConnection -LocalPort 5000`
+     Kill the blocking process: `Stop-Process -Id <PID> -Force`
+
+Issue: Vercel frontend shows API connection error
+Fix: Verify your AWS EC2 instance is running and port 5000 is open in your
+     AWS Security Group. Test: `curl http://<YOUR_AWS_ELASTIC_IP>:5000/api/health`
+
+Issue: Docker volume reset needed
+Fix: Run: `docker compose down -v` followed by:
+     `docker compose --profile monitoring up -d --build`
+
+================================================================================
+END OF DOCUMENTATION
+================================================================================
