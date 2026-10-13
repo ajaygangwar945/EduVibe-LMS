@@ -6,9 +6,9 @@ services:
     image: mongo:7.0
     container_name: eduvibe-mongo
     restart: always
-    # Security: Bind to localhost only so external network scanners cannot access MongoDB directly
+    # Security: Bind to unreserved port to avoid conflict with local Windows MongoDB service
     ports:
-      - "127.0.0.1:27017:27017"
+      - "127.0.0.1:${MONGO_PORT:-27018}:27017"
     healthcheck:
       test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")' || exit 1"]
       interval: 10s
