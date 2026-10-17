@@ -42,3 +42,7 @@ pnpm-debug.log*
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Local Project Documentation & PDF generator (Excluded from Git)
+EduVibe_Three_Methods_To_Run_Projects.pdf
+generate_pdf_guide.py
