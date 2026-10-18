@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const OTP = require('../models/OTP');
+const { sendOTPEmail } = require('../utils/emailService');
 const { protect } = require('../middleware/auth');
 
 // In-memory rate limiting against brute-force login attacks
@@ -37,15 +39,73 @@ const generateToken = (id) => {
   });
 };
 
+// @route   POST /api/auth/send-otp
+// @desc    Send 6-digit OTP verification code via Resend
+router.post('/send-otp', rateLimitAuth, async (req, res) => {
+  try {
+    const { email, purpose } = req.body;
+
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const validPurposes = ['registration', 'password_reset'];
+    const cleanPurpose = validPurposes.includes(purpose) ? purpose : 'registration';
+
+    // Validate email according to purpose
+    if (cleanPurpose === 'registration') {
+      const existingUser = await User.findOne({ email: cleanEmail });
+      if (existingUser) {
+        return res.status(400).json({ success: false, message: 'This email is already registered. Please sign in instead.' });
+      }
+    } else if (cleanPurpose === 'password_reset') {
+      const user = await User.findOne({ email: cleanEmail });
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'No registered account found with this email address.' });
+      }
+    }
+
+    // Generate random 6-digit numeric OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Invalidate previous OTPs for this email and purpose
+    await OTP.deleteMany({ email: cleanEmail, purpose: cleanPurpose });
+
+    // Store new OTP with 5-minute auto expiration
+    await OTP.create({
+      email: cleanEmail,
+      otp,
+      purpose: cleanPurpose,
+    });
+
+    // Send email via Resend API
+    const emailResult = await sendOTPEmail(cleanEmail, otp, cleanPurpose);
+
+    res.json({
+      success: true,
+      message: `A 6-digit verification code has been sent to ${cleanEmail}. Valid for 5 minutes.`,
+      devOtp: emailResult.delivered ? undefined : emailResult.devOtp,
+    });
+  } catch (error) {
+    console.error('Error in send-otp:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // @route   POST /api/auth/register-student
-// @desc    Register a new student account (immediately active)
+// @desc    Register a new student account (immediately active upon OTP verification)
 router.post('/register-student', rateLimitAuth, async (req, res) => {
   try {
-    const { name, email, password, phone, address, department, courseName } = req.body;
+    const { name, email, password, phone, address, department, courseName, otp } = req.body;
 
     // Strict type check to prevent NoSQL operator injection
     if (!name || typeof name !== 'string' || !email || typeof email !== 'string' || !password || typeof password !== 'string') {
       return res.status(400).json({ success: false, message: 'Please provide valid name, email, and password.' });
+    }
+
+    if (!otp || typeof otp !== 'string') {
+      return res.status(400).json({ success: false, message: 'Please provide the 6-digit verification code (OTP) sent to your email.' });
     }
 
     if (password.length < 6) {
@@ -53,6 +113,12 @@ router.post('/register-student', rateLimitAuth, async (req, res) => {
     }
 
     const cleanEmail = email.trim().toLowerCase();
+
+    // Verify OTP
+    const validOtp = await OTP.findOne({ email: cleanEmail, otp: otp.trim(), purpose: 'registration' });
+    if (!validOtp) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired verification code (OTP). Please request a new code.' });
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email: cleanEmail });
@@ -79,6 +145,9 @@ router.post('/register-student', rateLimitAuth, async (req, res) => {
 
     const token = generateToken(student._id);
 
+    // Consume and delete the validated OTP
+    await OTP.deleteMany({ email: cleanEmail, purpose: 'registration' });
+
     res.status(201).json({
       success: true,
       message: 'Student account registered successfully!',
@@ -99,14 +168,18 @@ router.post('/register-student', rateLimitAuth, async (req, res) => {
 });
 
 // @route   POST /api/auth/register-faculty
-// @desc    Register a faculty member (pending admin approval)
+// @desc    Register a faculty member (pending admin approval upon OTP verification)
 router.post('/register-faculty', rateLimitAuth, async (req, res) => {
   try {
-    const { name, email, password, department, courseName, address, phone } = req.body;
+    const { name, email, password, department, courseName, address, phone, otp } = req.body;
 
     // Strict type check to prevent NoSQL operator injection
     if (!name || typeof name !== 'string' || !email || typeof email !== 'string' || !password || typeof password !== 'string') {
       return res.status(400).json({ success: false, message: 'Please provide valid name, email, and password.' });
+    }
+
+    if (!otp || typeof otp !== 'string') {
+      return res.status(400).json({ success: false, message: 'Please provide the 6-digit verification code (OTP) sent to your email.' });
     }
 
     if (password.length < 6) {
@@ -114,6 +187,12 @@ router.post('/register-faculty', rateLimitAuth, async (req, res) => {
     }
 
     const cleanEmail = email.trim().toLowerCase();
+
+    // Verify OTP
+    const validOtp = await OTP.findOne({ email: cleanEmail, otp: otp.trim(), purpose: 'registration' });
+    if (!validOtp) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired verification code (OTP). Please request a new code.' });
+    }
 
     const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
@@ -131,6 +210,9 @@ router.post('/register-faculty', rateLimitAuth, async (req, res) => {
       phone: typeof phone === 'string' ? phone.trim() : '',
       isApproved: false, // Requires Admin Approval
     });
+
+    // Consume and delete the validated OTP
+    await OTP.deleteMany({ email: cleanEmail, purpose: 'registration' });
 
     res.status(201).json({
       success: true,
@@ -278,13 +360,17 @@ router.post('/login', rateLimitAuth, async (req, res) => {
 });
 
 // @route   POST /api/auth/reset-password
-// @desc    Reset password for any user account (Student, Faculty, Admin)
+// @desc    Reset password for any user account (Student, Faculty, Admin) with OTP
 router.post('/reset-password', rateLimitAuth, async (req, res) => {
   try {
-    const { email, newPassword, confirmPassword } = req.body;
+    const { email, newPassword, confirmPassword, otp } = req.body;
 
     if (!email || typeof email !== 'string' || !newPassword || typeof newPassword !== 'string') {
       return res.status(400).json({ success: false, message: 'Please provide email and new password.' });
+    }
+
+    if (!otp || typeof otp !== 'string') {
+      return res.status(400).json({ success: false, message: 'Please provide the 6-digit verification code (OTP) sent to your email.' });
     }
 
     if (newPassword.length < 6) {
@@ -296,6 +382,13 @@ router.post('/reset-password', rateLimitAuth, async (req, res) => {
     }
 
     const cleanEmail = email.trim().toLowerCase();
+
+    // Verify OTP
+    const validOtp = await OTP.findOne({ email: cleanEmail, otp: otp.trim(), purpose: 'password_reset' });
+    if (!validOtp) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired verification code (OTP). Please request a new code.' });
+    }
+
     const user = await User.findOne({ email: cleanEmail });
     if (!user) {
       return res.status(404).json({ success: false, message: 'No registered user found with this email address.' });
@@ -303,6 +396,9 @@ router.post('/reset-password', rateLimitAuth, async (req, res) => {
 
     user.password = newPassword;
     await user.save();
+
+    // Consume and delete the validated OTP
+    await OTP.deleteMany({ email: cleanEmail, purpose: 'password_reset' });
 
     res.json({
       success: true,

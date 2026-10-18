@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from '../components/ThemeToggle';
 import { GraduationCapIcon, TeacherIcon, ShieldIcon } from '../components/Icons';
 import mascotImage from '../assets/mascot.jpg';
 
 export default function LoginPage() {
-  const { login, registerStudent, registerFaculty, registerAdmin, resetPassword } = useAuth();
+  const { login, registerStudent, registerFaculty, resetPassword, sendOtp } = useAuth();
 
   const [activeRole, setActiveRole] = useState('student'); // 'student', 'faculty', 'admin'
   const [isRegistering, setIsRegistering] = useState(false);
@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Main Form Fields
+  // Main Form Fields (Includes OTP for registration)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,17 +23,49 @@ export default function LoginPage() {
     address: '',
     department: 'Computer Science',
     courseName: '',
+    otp: '',
   });
 
-  // Password Reset Fields
+  // Registration OTP States
+  const [regOtpSent, setRegOtpSent] = useState(false);
+  const [regOtpLoading, setRegOtpLoading] = useState(false);
+  const [regOtpCountdown, setRegOtpCountdown] = useState(0);
+
+  // Password Reset Fields (Includes OTP for reset)
   const [resetData, setResetData] = useState({
     email: '',
+    otp: '',
     newPassword: '',
     confirmPassword: '',
   });
   const [resetLoading, setResetLoading] = useState(false);
   const [resetError, setResetError] = useState('');
   const [resetSuccess, setResetSuccess] = useState('');
+  const [resetOtpSent, setResetOtpSent] = useState(false);
+  const [resetOtpLoading, setResetOtpLoading] = useState(false);
+  const [resetOtpCountdown, setResetOtpCountdown] = useState(0);
+
+  // Countdown timer effect for registration OTP
+  useEffect(() => {
+    let timer;
+    if (regOtpCountdown > 0) {
+      timer = setInterval(() => {
+        setRegOtpCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [regOtpCountdown]);
+
+  // Countdown timer effect for reset password OTP
+  useEffect(() => {
+    let timer;
+    if (resetOtpCountdown > 0) {
+      timer = setInterval(() => {
+        setResetOtpCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resetOtpCountdown]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -53,6 +85,64 @@ export default function LoginPage() {
     setSuccessMsg('');
     setResetError('');
     setResetSuccess('');
+    setRegOtpSent(false);
+    setResetOtpSent(false);
+  };
+
+  // Trigger Send OTP for Registration
+  const handleSendRegOtp = async () => {
+    setError('');
+    setSuccessMsg('');
+
+    const trimmedEmail = formData.email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setError('Please provide a valid email address before requesting an OTP code.');
+      return;
+    }
+
+    setRegOtpLoading(true);
+    try {
+      const res = await sendOtp(trimmedEmail, 'registration');
+      setRegOtpSent(true);
+      setRegOtpCountdown(60);
+      setSuccessMsg(`✅ Verification code sent to ${trimmedEmail}! Check your inbox.`);
+      if (res.devOtp) {
+        setSuccessMsg(`✅ Code dispatched to ${trimmedEmail}! (Demo OTP: ${res.devOtp})`);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to send OTP. Please try again.');
+    } finally {
+      setRegOtpLoading(false);
+    }
+  };
+
+  // Trigger Send OTP for Password Reset
+  const handleSendResetOtp = async () => {
+    setResetError('');
+    setResetSuccess('');
+
+    const trimmedEmail = resetData.email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setResetError('Please enter your registered email address before requesting an OTP code.');
+      return;
+    }
+
+    setResetOtpLoading(true);
+    try {
+      const res = await sendOtp(trimmedEmail, 'password_reset');
+      setResetOtpSent(true);
+      setResetOtpCountdown(60);
+      setResetSuccess(`✅ Verification code sent to ${trimmedEmail}! Check your inbox.`);
+      if (res.devOtp) {
+        setResetSuccess(`✅ Code dispatched to ${trimmedEmail}! (Demo OTP: ${res.devOtp})`);
+      }
+    } catch (err) {
+      setResetError(err.message || 'Failed to send reset code. Please verify your email.');
+    } finally {
+      setResetOtpLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -73,9 +163,15 @@ export default function LoginPage() {
       return;
     }
 
-    if (isRegistering && !formData.name.trim()) {
-      setError('Please enter your full name.');
-      return;
+    if (isRegistering) {
+      if (!formData.name.trim()) {
+        setError('Please enter your full name.');
+        return;
+      }
+      if (!formData.otp.trim() || formData.otp.trim().length !== 6) {
+        setError('Please enter the 6-digit OTP verification code sent to your email.');
+        return;
+      }
     }
 
     setLoading(true);
@@ -88,6 +184,7 @@ export default function LoginPage() {
         phone: formData.phone.trim(),
         address: formData.address.trim(),
         courseName: formData.courseName.trim(),
+        otp: formData.otp.trim(),
       };
 
       if (isRegistering) {
@@ -97,9 +194,6 @@ export default function LoginPage() {
           const res = await registerFaculty(payload);
           setSuccessMsg(res.message || 'Registration submitted for Admin approval.');
           setIsRegistering(false);
-        } else if (activeRole === 'admin') {
-          // Blocked by design - Only single master admin allowed
-          setError('Admin creation is restricted to the master administrator.');
         }
       } else {
         await login(trimmedEmail, formData.password, activeRole);
@@ -123,6 +217,11 @@ export default function LoginPage() {
       return;
     }
 
+    if (!resetData.otp.trim() || resetData.otp.trim().length !== 6) {
+      setResetError('Please enter the 6-digit OTP verification code sent to your email.');
+      return;
+    }
+
     if (resetData.newPassword.length < 6) {
       setResetError('New password must be at least 6 characters long.');
       return;
@@ -136,11 +235,16 @@ export default function LoginPage() {
     setResetLoading(true);
 
     try {
-      const res = await resetPassword(cleanEmail, resetData.newPassword, resetData.confirmPassword);
+      const res = await resetPassword(
+        cleanEmail,
+        resetData.newPassword,
+        resetData.confirmPassword,
+        resetData.otp.trim()
+      );
       setResetSuccess(res.message || 'Password reset successfully!');
       setTimeout(() => {
         setIsResettingPassword(false);
-        setFormData((prev) => ({ ...prev, email: cleanEmail, password: '' }));
+        setFormData((prev) => ({ ...prev, email: cleanEmail, password: '', otp: '' }));
         setSuccessMsg('Password updated! Please sign in with your new password.');
       }, 2000);
     } catch (err) {
@@ -224,12 +328,12 @@ export default function LoginPage() {
 
           {successMsg && (
             <div style={{ background: 'var(--success-bg)', border: '1px solid var(--success)', color: 'var(--success)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.25rem', fontSize: '0.875rem' }}>
-              ✅ {successMsg}
+              {successMsg}
             </div>
           )}
 
           {/* ============================================================= */}
-          {/* VIEW A: PASSWORD RESET FORM (Available for Student, Faculty, Admin) */}
+          {/* VIEW A: PASSWORD RESET FORM (Protected with OTP) */}
           {/* ============================================================= */}
           {isResettingPassword ? (
             <div>
@@ -247,20 +351,48 @@ export default function LoginPage() {
 
               {resetSuccess && (
                 <div style={{ background: 'var(--success-bg)', border: '1px solid var(--success)', color: 'var(--success)', padding: '0.65rem 0.9rem', borderRadius: 'var(--radius-sm)', marginBottom: '1rem', fontSize: '0.85rem' }}>
-                  ✅ {resetSuccess}
+                  {resetSuccess}
                 </div>
               )}
 
               <form onSubmit={handleResetSubmit}>
                 <div className="form-group">
                   <label className="form-label">Registered Email Address</label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      placeholder="Enter your registered email"
+                      className="form-input"
+                      value={resetData.email}
+                      onChange={handleResetChange}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{ fontSize: '0.8rem', padding: '0.5rem 0.85rem', whiteSpace: 'nowrap' }}
+                      disabled={resetOtpLoading || resetOtpCountdown > 0 || !resetData.email.trim()}
+                      onClick={handleSendResetOtp}
+                    >
+                      {resetOtpLoading ? 'Sending...' : resetOtpCountdown > 0 ? `${resetOtpCountdown}s` : (resetOtpSent ? 'Resend' : 'Get OTP')}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: 600 }}>
+                    6-Digit Verification Code (OTP) *
+                  </label>
                   <input
-                    type="email"
-                    name="email"
+                    type="text"
+                    name="otp"
                     required
-                    placeholder="Enter your registered email"
+                    maxLength={6}
+                    placeholder="e.g. 584920"
                     className="form-input"
-                    value={resetData.email}
+                    style={{ letterSpacing: '4px', fontSize: '1.1rem', fontWeight: 700, textAlign: 'center' }}
+                    value={resetData.otp}
                     onChange={handleResetChange}
                   />
                 </div>
@@ -297,7 +429,7 @@ export default function LoginPage() {
                   style={{ width: '100%', marginTop: '0.75rem', padding: '0.85rem' }}
                   disabled={resetLoading}
                 >
-                  {resetLoading ? 'Updating Password...' : 'Set New Password'}
+                  {resetLoading ? 'Updating Password...' : 'Verify OTP & Reset Password'}
                 </button>
 
                 <div style={{ marginTop: '1.2rem', textAlign: 'center' }}>
@@ -403,16 +535,66 @@ export default function LoginPage() {
 
                 <div className="form-group">
                   <label className="form-label">Email Address</label>
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    placeholder="name@example.com"
-                    className="form-input"
-                    value={formData.email}
-                    onChange={handleChange}
-                  />
+                  {isRegistering && activeRole !== 'admin' ? (
+                    <div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input
+                          type="email"
+                          name="email"
+                          required
+                          placeholder="name@example.com"
+                          className="form-input"
+                          value={formData.email}
+                          onChange={handleChange}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          style={{ fontSize: '0.8rem', padding: '0.5rem 0.85rem', whiteSpace: 'nowrap' }}
+                          disabled={regOtpLoading || regOtpCountdown > 0 || !formData.email.trim()}
+                          onClick={handleSendRegOtp}
+                        >
+                          {regOtpLoading ? 'Sending...' : regOtpCountdown > 0 ? `${regOtpCountdown}s` : (regOtpSent ? 'Resend' : 'Get OTP')}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      placeholder="name@example.com"
+                      className="form-input"
+                      value={formData.email}
+                      onChange={handleChange}
+                    />
+                  )}
                 </div>
+
+                {/* Registration OTP Input */}
+                {isRegistering && activeRole !== 'admin' && (
+                  <div className="form-group" style={{ background: 'var(--surface-sunken)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                      <label className="form-label" style={{ marginBottom: 0, fontWeight: 700, color: 'var(--primary)' }}>
+                        6-Digit Verification Code (OTP) *
+                      </label>
+                      {!regOtpSent && (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Click 'Get OTP' above</span>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      name="otp"
+                      required
+                      maxLength={6}
+                      placeholder="e.g. 584920"
+                      className="form-input"
+                      style={{ letterSpacing: '4px', fontSize: '1.1rem', fontWeight: 700, textAlign: 'center' }}
+                      value={formData.otp}
+                      onChange={handleChange}
+                    />
+                  </div>
+                )}
 
                 <div className="form-group">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
@@ -422,7 +604,7 @@ export default function LoginPage() {
                         type="button"
                         onClick={() => {
                           setIsResettingPassword(true);
-                          setResetData({ email: formData.email, newPassword: '', confirmPassword: '' });
+                          setResetData({ email: formData.email, otp: '', newPassword: '', confirmPassword: '' });
                           setError('');
                           setSuccessMsg('');
                         }}
@@ -451,7 +633,7 @@ export default function LoginPage() {
                 >
                   {loading ? 'Processing...' : (
                     isRegistering
-                      ? (activeRole === 'faculty' ? 'Submit Faculty Registration' : 'Create Student Account')
+                      ? (activeRole === 'faculty' ? 'Verify OTP & Submit Faculty Registration' : 'Verify OTP & Create Student Account')
                       : `Sign In as ${activeRole.charAt(0).toUpperCase() + activeRole.slice(1)}`
                   )}
                 </button>

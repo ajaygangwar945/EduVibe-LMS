@@ -113,12 +113,28 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   };
 
+  // Send OTP for registration or password reset via Resend
+  const sendOtp = async (email, purpose = 'registration') => {
+    const res = await fetch('/api/auth/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, purpose }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to send OTP verification code');
+    }
+
+    return data;
+  };
+
   // Reset Password for any user (Student, Faculty, Admin)
-  const resetPassword = async (email, newPassword, confirmPassword) => {
+  const resetPassword = async (email, newPassword, confirmPassword, otp) => {
     const res = await fetch('/api/auth/reset-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, newPassword, confirmPassword }),
+      body: JSON.stringify({ email, newPassword, confirmPassword, otp }),
     });
 
     const data = await res.json();
@@ -146,6 +162,7 @@ export const AuthProvider = ({ children }) => {
         registerStudent,
         registerFaculty,
         registerAdmin,
+        sendOtp,
         resetPassword,
         logout,
       }}
