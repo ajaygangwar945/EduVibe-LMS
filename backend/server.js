@@ -125,7 +125,7 @@ app.use((err, req, res, next) => {
 // -------------------------------------------------------------
 // Database Connection
 // -------------------------------------------------------------
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/eduvibe';
+const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/eduvibe';
 
 mongoose
   .connect(MONGO_URI)
