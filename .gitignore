@@ -45,6 +45,7 @@ Thumbs.db
 
 # Local Project Documentation & PDF generator (Excluded from Git)
 EduVibe_Three_Methods_To_Run_Projects.pdf
+EduVibe-LMS-Guide.pdf
 generate_pdf_guide.py
 
 # Local Prometheus TSDB Runtime Database Cache
