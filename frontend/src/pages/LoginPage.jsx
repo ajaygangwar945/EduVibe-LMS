@@ -410,7 +410,7 @@ export default function LoginPage() {
                     type="email"
                     name="email"
                     required
-                    placeholder={activeRole === 'admin' ? 'admin@eduvibe.com' : 'name@example.com'}
+                    placeholder="name@example.com"
                     className="form-input"
                     value={formData.email}
                     onChange={handleChange}
@@ -462,15 +462,7 @@ export default function LoginPage() {
 
               {/* Bottom Policy & Registration Switcher */}
               <div style={{ marginTop: '1.4rem', textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                {activeRole === 'admin' ? (
-                  /* Admin Single-User Notice: No registration allowed */
-                  <div style={{ background: 'var(--surface-sunken, #f8f9fa)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.825rem', color: 'var(--text-muted)', textAlign: 'left' }}>
-                    🛡️ <strong>Single Administrator Policy:</strong> New admin registrations are strictly disabled. Sign in with the master administrator credentials:
-                    <div style={{ marginTop: '0.35rem', fontWeight: 600, color: 'var(--text-main)' }}>
-                      📧 <code>admin@eduvibe.com</code>
-                    </div>
-                  </div>
-                ) : isRegistering ? (
+                {activeRole === 'admin' ? null : isRegistering ? (
                   <span>
                     Already have an account?{' '}
                     <button

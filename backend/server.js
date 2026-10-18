@@ -133,8 +133,8 @@ async function seedDefaultAdmin() {
   try {
     const adminCount = await User.countDocuments({ role: 'admin' });
     if (adminCount === 0) {
-      const email = (process.env.ADMIN_EMAIL || 'admin@eduvibe.com').toLowerCase().trim();
-      const password = process.env.ADMIN_PASSWORD || 'admin123';
+      const email = (process.env.ADMIN_EMAIL || 'ajay.12322931@lpu.in').toLowerCase().trim();
+      const password = process.env.ADMIN_PASSWORD || '123456';
       await User.create({
         name: 'System Administrator',
         email,
