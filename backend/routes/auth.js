@@ -151,9 +151,18 @@ router.post('/register-faculty', rateLimitAuth, async (req, res) => {
 });
 
 // @route   POST /api/auth/register-admin
-// @desc    Register a new administrator account (immediately active)
+// @desc    Register administrator account (only allowed if no admin exists)
 router.post('/register-admin', rateLimitAuth, async (req, res) => {
   try {
+    // Only ONE admin allowed in the entire system
+    const adminCount = await User.countDocuments({ role: 'admin' });
+    if (adminCount >= 1) {
+      return res.status(403).json({
+        success: false,
+        message: 'Admin registration is disabled: Only one master administrator is allowed in EduVibe.',
+      });
+    }
+
     const { name, email, password, phone, address, department } = req.body;
 
     if (!name || typeof name !== 'string' || !email || typeof email !== 'string' || !password || typeof password !== 'string') {
@@ -264,6 +273,43 @@ router.post('/login', rateLimitAuth, async (req, res) => {
     });
   } catch (error) {
     console.error('Error in login:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @route   POST /api/auth/reset-password
+// @desc    Reset password for any user account (Student, Faculty, Admin)
+router.post('/reset-password', rateLimitAuth, async (req, res) => {
+  try {
+    const { email, newPassword, confirmPassword } = req.body;
+
+    if (!email || typeof email !== 'string' || !newPassword || typeof newPassword !== 'string') {
+      return res.status(400).json({ success: false, message: 'Please provide email and new password.' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long.' });
+    }
+
+    if (confirmPassword && newPassword !== confirmPassword) {
+      return res.status(400).json({ success: false, message: 'New password and confirm password do not match.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'No registered user found with this email address.' });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `Password reset successfully for ${user.name} (${user.role.toUpperCase()})! You can now log in with your new password.`,
+    });
+  } catch (error) {
+    console.error('Error in reset password:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });

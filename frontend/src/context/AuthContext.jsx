@@ -113,6 +113,22 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   };
 
+  // Reset Password for any user (Student, Faculty, Admin)
+  const resetPassword = async (email, newPassword, confirmPassword) => {
+    const res = await fetch('/api/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, newPassword, confirmPassword }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Password reset failed');
+    }
+
+    return data;
+  };
+
   // Logout
   const logout = () => {
     localStorage.removeItem('eduvibe_token');
@@ -130,6 +146,7 @@ export const AuthProvider = ({ children }) => {
         registerStudent,
         registerFaculty,
         registerAdmin,
+        resetPassword,
         logout,
       }}
     >

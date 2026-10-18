@@ -127,10 +127,37 @@ app.use((err, req, res, next) => {
 // -------------------------------------------------------------
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/eduvibe';
 
+const User = require('./models/User');
+
+async function seedDefaultAdmin() {
+  try {
+    const adminCount = await User.countDocuments({ role: 'admin' });
+    if (adminCount === 0) {
+      const email = (process.env.ADMIN_EMAIL || 'admin@eduvibe.com').toLowerCase().trim();
+      const password = process.env.ADMIN_PASSWORD || 'admin123';
+      await User.create({
+        name: 'System Administrator',
+        email,
+        password,
+        role: 'admin',
+        department: 'Administration',
+        regNumber: 'ADM-001',
+        isApproved: true,
+      });
+      console.log(`[Admin Seed] ✅ Initialized single master administrator: ${email}`);
+    } else {
+      console.log(`[Admin Seed] ✅ Master administrator verified in database (${adminCount} admin).`);
+    }
+  } catch (err) {
+    console.warn('[Admin Seed] Notice:', err.message);
+  }
+}
+
 mongoose
   .connect(MONGO_URI)
-  .then(() => {
+  .then(async () => {
     console.log(`[Database] MongoDB connected successfully to ${MONGO_URI}`);
+    await seedDefaultAdmin();
   })
   .catch((err) => {
     console.warn(`[Database Warning] Could not connect to local MongoDB (${err.message}). When running in Docker/AWS, MongoDB container will connect automatically.`);

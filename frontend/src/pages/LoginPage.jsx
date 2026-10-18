@@ -5,15 +5,16 @@ import { GraduationCapIcon, TeacherIcon, ShieldIcon } from '../components/Icons'
 import mascotImage from '../assets/mascot.jpg';
 
 export default function LoginPage() {
-  const { login, registerStudent, registerFaculty, registerAdmin } = useAuth();
+  const { login, registerStudent, registerFaculty, registerAdmin, resetPassword } = useAuth();
 
   const [activeRole, setActiveRole] = useState('student'); // 'student', 'faculty', 'admin'
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Form Fields
+  // Main Form Fields
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -24,16 +25,34 @@ export default function LoginPage() {
     courseName: '',
   });
 
+  // Password Reset Fields
+  const [resetData, setResetData] = useState({
+    email: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState('');
+  const [resetSuccess, setResetSuccess] = useState('');
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
   };
 
+  const handleResetChange = (e) => {
+    setResetData({ ...resetData, [e.target.name]: e.target.value });
+    setResetError('');
+  };
+
   const handleRoleChange = (role) => {
     setActiveRole(role);
     setIsRegistering(false);
+    setIsResettingPassword(false);
     setError('');
     setSuccessMsg('');
+    setResetError('');
+    setResetSuccess('');
   };
 
   const handleSubmit = async (e) => {
@@ -79,7 +98,8 @@ export default function LoginPage() {
           setSuccessMsg(res.message || 'Registration submitted for Admin approval.');
           setIsRegistering(false);
         } else if (activeRole === 'admin') {
-          await registerAdmin(payload);
+          // Blocked by design - Only single master admin allowed
+          setError('Admin creation is restricted to the master administrator.');
         }
       } else {
         await login(trimmedEmail, formData.password, activeRole);
@@ -88,6 +108,45 @@ export default function LoginPage() {
       setError(err.message || 'Authentication failed. Please verify your credentials.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResetSubmit = async (e) => {
+    e.preventDefault();
+    setResetError('');
+    setResetSuccess('');
+
+    const cleanEmail = resetData.email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      setResetError('Please enter a valid email address.');
+      return;
+    }
+
+    if (resetData.newPassword.length < 6) {
+      setResetError('New password must be at least 6 characters long.');
+      return;
+    }
+
+    if (resetData.newPassword !== resetData.confirmPassword) {
+      setResetError('New password and confirm password do not match.');
+      return;
+    }
+
+    setResetLoading(true);
+
+    try {
+      const res = await resetPassword(cleanEmail, resetData.newPassword, resetData.confirmPassword);
+      setResetSuccess(res.message || 'Password reset successfully!');
+      setTimeout(() => {
+        setIsResettingPassword(false);
+        setFormData((prev) => ({ ...prev, email: cleanEmail, password: '' }));
+        setSuccessMsg('Password updated! Please sign in with your new password.');
+      }, 2000);
+    } catch (err) {
+      setResetError(err.message || 'Password reset failed.');
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -110,7 +169,7 @@ export default function LoginPage() {
       {/* Single Unified Card containing both Login and Mascot */}
       <div className="rainbow-border-box unified-auth-card">
         
-        {/* LEFT COLUMN: Login / Register Form */}
+        {/* LEFT COLUMN: Login / Register / Password Reset Form */}
         <div className="unified-auth-left">
           
           {/* Brand Header */}
@@ -169,154 +228,274 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Faculty Approval Reminder Banner */}
-          {activeRole === 'faculty' && isRegistering && (
-            <div style={{ background: 'var(--warning-bg)', border: '1px solid var(--warning)', color: 'var(--warning)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.25rem', fontSize: '0.825rem' }}>
-              ℹ️ <strong>Faculty Notice:</strong> Teacher registrations require Admin approval. You will receive your official Registration Number once approved.
-            </div>
-          )}
+          {/* ============================================================= */}
+          {/* VIEW A: PASSWORD RESET FORM (Available for Student, Faculty, Admin) */}
+          {/* ============================================================= */}
+          {isResettingPassword ? (
+            <div>
+              <div style={{ marginBottom: '1.2rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--text-main)' }}>
+                  🔑 Reset Account Password
+                </h3>
+                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: '0.25rem 0 0 0' }}>
+                  Available for all registered accounts ({activeRole.toUpperCase()}, Faculty & Students).
+                </p>
+              </div>
 
-          {/* Main Auth Form */}
-          <form onSubmit={handleSubmit}>
-            {isRegistering && (
-              <>
+              {resetError && (
+                <div style={{ background: 'var(--danger-bg)', border: '1px solid var(--danger)', color: 'var(--danger)', padding: '0.65rem 0.9rem', borderRadius: 'var(--radius-sm)', marginBottom: '1rem', fontSize: '0.85rem' }}>
+                  ⚠️ {resetError}
+                </div>
+              )}
+
+              {resetSuccess && (
+                <div style={{ background: 'var(--success-bg)', border: '1px solid var(--success)', color: 'var(--success)', padding: '0.65rem 0.9rem', borderRadius: 'var(--radius-sm)', marginBottom: '1rem', fontSize: '0.85rem' }}>
+                  ✅ {resetSuccess}
+                </div>
+              )}
+
+              <form onSubmit={handleResetSubmit}>
                 <div className="form-group">
-                  <label className="form-label">Full Name</label>
+                  <label className="form-label">Registered Email Address</label>
                   <input
-                    type="text"
-                    name="name"
+                    type="email"
+                    name="email"
                     required
-                    placeholder="e.g. Alex Johnson"
+                    placeholder="Enter your registered email"
                     className="form-input"
-                    value={formData.name}
-                    onChange={handleChange}
+                    value={resetData.email}
+                    onChange={handleResetChange}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Department</label>
-                  <select
-                    name="department"
-                    className="form-select"
-                    value={formData.department}
-                    onChange={handleChange}
-                  >
-                    <option value="Computer Science">Computer Science & Engineering</option>
-                    <option value="Information Technology">Information Technology</option>
-                    <option value="Electronics & Comm">Electronics & Communication</option>
-                    <option value="Mechanical Engineering">Mechanical Engineering</option>
-                    <option value="Civil Engineering">Civil Engineering</option>
-                    {activeRole === 'admin' && <option value="Administration">Administration</option>}
-                  </select>
+                  <label className="form-label">New Password</label>
+                  <input
+                    type="password"
+                    name="newPassword"
+                    required
+                    placeholder="Minimum 6 characters"
+                    className="form-input"
+                    value={resetData.newPassword}
+                    onChange={handleResetChange}
+                  />
                 </div>
 
-                {activeRole === 'faculty' && (
-                  <div className="form-group">
-                    <label className="form-label">Primary Course / Subject Specialization</label>
-                    <input
-                      type="text"
-                      name="courseName"
-                      required
-                      placeholder="e.g. Data Structures & Algorithms"
-                      className="form-input"
-                      value={formData.courseName}
-                      onChange={handleChange}
-                    />
-                  </div>
+                <div className="form-group">
+                  <label className="form-label">Confirm New Password</label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    required
+                    placeholder="Re-enter new password"
+                    className="form-input"
+                    value={resetData.confirmPassword}
+                    onChange={handleResetChange}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ width: '100%', marginTop: '0.75rem', padding: '0.85rem' }}
+                  disabled={resetLoading}
+                >
+                  {resetLoading ? 'Updating Password...' : 'Set New Password'}
+                </button>
+
+                <div style={{ marginTop: '1.2rem', textAlign: 'center' }}>
+                  <button
+                    type="button"
+                    style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600, fontSize: '0.875rem' }}
+                    onClick={() => {
+                      setIsResettingPassword(false);
+                      setResetError('');
+                      setResetSuccess('');
+                    }}
+                  >
+                    ← Back to Sign In
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            /* ============================================================= */
+            /* VIEW B: SIGN IN / REGISTRATION FORM */
+            /* ============================================================= */
+            <>
+              {/* Faculty Approval Reminder Banner */}
+              {activeRole === 'faculty' && isRegistering && (
+                <div style={{ background: 'var(--warning-bg)', border: '1px solid var(--warning)', color: 'var(--warning)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.25rem', fontSize: '0.825rem' }}>
+                  ℹ️ <strong>Faculty Notice:</strong> Teacher registrations require Admin approval. You will receive your official Registration Number once approved.
+                </div>
+              )}
+
+              {/* Main Auth Form */}
+              <form onSubmit={handleSubmit}>
+                {isRegistering && activeRole !== 'admin' && (
+                  <>
+                    <div className="form-group">
+                      <label className="form-label">Full Name</label>
+                      <input
+                        type="text"
+                        name="name"
+                        required
+                        placeholder="e.g. Alex Johnson"
+                        className="form-input"
+                        value={formData.name}
+                        onChange={handleChange}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Department</label>
+                      <select
+                        name="department"
+                        className="form-select"
+                        value={formData.department}
+                        onChange={handleChange}
+                      >
+                        <option value="Computer Science">Computer Science & Engineering</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Electronics & Comm">Electronics & Communication</option>
+                        <option value="Mechanical Engineering">Mechanical Engineering</option>
+                        <option value="Civil Engineering">Civil Engineering</option>
+                      </select>
+                    </div>
+
+                    {activeRole === 'faculty' && (
+                      <div className="form-group">
+                        <label className="form-label">Primary Course / Subject Specialization</label>
+                        <input
+                          type="text"
+                          name="courseName"
+                          required
+                          placeholder="e.g. Data Structures & Algorithms"
+                          className="form-input"
+                          value={formData.courseName}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    )}
+
+                    <div className="form-group">
+                      <label className="form-label">Phone Number</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        placeholder="+91 98765 43210"
+                        className="form-input"
+                        value={formData.phone}
+                        onChange={handleChange}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Address</label>
+                      <input
+                        type="text"
+                        name="address"
+                        placeholder="Campus Hostel / City Address"
+                        className="form-input"
+                        value={formData.address}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </>
                 )}
 
                 <div className="form-group">
-                  <label className="form-label">Phone Number</label>
+                  <label className="form-label">Email Address</label>
                   <input
-                    type="tel"
-                    name="phone"
-                    placeholder="+91 98765 43210"
+                    type="email"
+                    name="email"
+                    required
+                    placeholder={activeRole === 'admin' ? 'admin@eduvibe.com' : 'name@example.com'}
                     className="form-input"
-                    value={formData.phone}
+                    value={formData.email}
                     onChange={handleChange}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Address</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                    <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
+                    {!isRegistering && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsResettingPassword(true);
+                          setResetData({ email: formData.email, newPassword: '', confirmPassword: '' });
+                          setError('');
+                          setSuccessMsg('');
+                        }}
+                        style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, padding: 0 }}
+                      >
+                        Forgot Password?
+                      </button>
+                    )}
+                  </div>
                   <input
-                    type="text"
-                    name="address"
-                    placeholder="Campus Hostel / City Address"
+                    type="password"
+                    name="password"
+                    required
+                    placeholder="••••••••"
                     className="form-input"
-                    value={formData.address}
+                    value={formData.password}
                     onChange={handleChange}
                   />
                 </div>
-              </>
-            )}
 
-            <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="name@example.com"
-                className="form-input"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input
-                type="password"
-                name="password"
-                required
-                placeholder="••••••••"
-                className="form-input"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
-
-            <button
-              type="submit"
-              className={`btn btn-primary ${activeRole === 'student' ? 'btn-role-student' : activeRole === 'faculty' ? 'btn-role-faculty' : 'btn-role-admin'}`}
-              style={{ width: '100%', marginTop: '0.75rem', padding: '0.85rem' }}
-              disabled={loading}
-            >
-              {loading ? 'Processing...' : (
-                isRegistering
-                  ? (activeRole === 'faculty' ? 'Submit Faculty Registration' : activeRole === 'admin' ? 'Create Admin Account' : 'Create Student Account')
-                  : `Sign In as ${activeRole.charAt(0).toUpperCase() + activeRole.slice(1)}`
-              )}
-            </button>
-          </form>
-
-          {/* Toggle between Sign In & Registration */}
-          <div style={{ marginTop: '1.4rem', textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-            {isRegistering ? (
-              <span>
-                Already have an account?{' '}
                 <button
-                  type="button"
-                  style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}
-                  onClick={() => setIsRegistering(false)}
+                  type="submit"
+                  className={`btn btn-primary ${activeRole === 'student' ? 'btn-role-student' : activeRole === 'faculty' ? 'btn-role-faculty' : 'btn-role-admin'}`}
+                  style={{ width: '100%', marginTop: '0.75rem', padding: '0.85rem' }}
+                  disabled={loading}
                 >
-                  Sign In
+                  {loading ? 'Processing...' : (
+                    isRegistering
+                      ? (activeRole === 'faculty' ? 'Submit Faculty Registration' : 'Create Student Account')
+                      : `Sign In as ${activeRole.charAt(0).toUpperCase() + activeRole.slice(1)}`
+                  )}
                 </button>
-              </span>
-            ) : (
-              <span>
-                New {activeRole}?{' '}
-                <button
-                  type="button"
-                  style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}
-                  onClick={() => setIsRegistering(true)}
-                >
-                  Create an account
-                </button>
-              </span>
-            )}
-          </div>
+              </form>
+
+              {/* Bottom Policy & Registration Switcher */}
+              <div style={{ marginTop: '1.4rem', textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                {activeRole === 'admin' ? (
+                  /* Admin Single-User Notice: No registration allowed */
+                  <div style={{ background: 'var(--surface-sunken, #f8f9fa)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.825rem', color: 'var(--text-muted)', textAlign: 'left' }}>
+                    🛡️ <strong>Single Administrator Policy:</strong> New admin registrations are strictly disabled. Sign in with the master administrator credentials:
+                    <div style={{ marginTop: '0.35rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                      📧 <code>admin@eduvibe.com</code>
+                    </div>
+                  </div>
+                ) : isRegistering ? (
+                  <span>
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}
+                      onClick={() => setIsRegistering(false)}
+                    >
+                      Sign In
+                    </button>
+                  </span>
+                ) : (
+                  <span>
+                    New {activeRole}?{' '}
+                    <button
+                      type="button"
+                      style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}
+                      onClick={() => setIsRegistering(true)}
+                    >
+                      Create an account
+                    </button>
+                  </span>
+                )}
+              </div>
+            </>
+          )}
 
         </div>
 
