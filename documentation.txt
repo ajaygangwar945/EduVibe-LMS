@@ -1,9 +1,8 @@
 ================================================================================
-EDUVIBE - NEXT-GEN ACADEMIC & LEARNING MANAGEMENT PORTAL
+EDUVIBE - NEXT-GEN LEARNING MANAGEMENT & ACADEMIC PORTAL
 COMPLETE TECHNICAL DOCUMENTATION & ARCHITECTURAL REFERENCE MANUAL
 ================================================================================
-Author: Ajay Gangwar
-Project: EduVibe Academic & Learning Management Portal (LMS)
+Project: EduVibe Learning Management & Academic Portal (LMS)
 Repository: https://github.com/ajaygangwar945/EduVibe-LMS
 Live Web Portal: https://edu-vibe-lms.vercel.app/
 ================================================================================

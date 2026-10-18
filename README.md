@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/eduvibe-banner.jpg" alt="EduVibe - Next-Gen Academic & Learning Management Portal" width="100%" height="200" style="object-fit: cover; border-radius: 8px;">
+  <img src="assets/eduvibe-banner.jpg" alt="EduVibe - Next-Gen Learning Management & Academic Portal" width="100%" height="200" style="object-fit: cover; border-radius: 8px;">
 </p>
 
-# 🎓 EduVibe - Next-Gen Academic & Learning Management Portal
+# 🎓 EduVibe - Next-Gen Learning Management & Academic Portal
 
 [![Vercel Live](https://img.shields.io/badge/Vercel-Live%20Frontend-black?style=for-the-badge&logo=vercel)](https://edu-vibe-lms.vercel.app/)
 [![AWS Cloud](https://img.shields.io/badge/AWS-EC2%20%7C%20S3%20%7C%20CloudFront-orange?style=for-the-badge&logo=amazon-aws)](https://aws.amazon.com/)
@@ -26,7 +26,7 @@
 
 ## 📌 Project Overview
 
-**EduVibe** is a modern, full-stack Academic & Learning Management Portal built with **React 18**, **Node.js**, **Express**, and **MongoDB 7.0**. It simplifies academic operations with three role-based dashboards:
+**EduVibe** is a modern, full-stack Learning Management & Academic Portal built with **React 18**, **Node.js**, **Express**, and **MongoDB 7.0**. It simplifies academic operations with three role-based dashboards:
 
 - 👨‍🎓 **Students**: Watch lecture videos, download notes, take auto-graded quizzes, submit assignments, and track attendance (with 75% minimum warning alerts).
 - 👩‍🏫 **Faculty**: Create courses, upload syllabus PDFs and video lectures, record daily attendance, create timed quizzes, and grade homework.
