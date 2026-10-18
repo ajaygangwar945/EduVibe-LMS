@@ -42,11 +42,20 @@ spec:
                   name: eduvibe-secrets
                   key: MONGO_URI
             - name: JWT_SECRET
-              value: "eduvibe_k8s_secret_key_2026"
+              valueFrom:
+                secretKeyRef:
+                  name: eduvibe-secrets
+                  key: JWT_SECRET
             - name: ADMIN_EMAIL
-              value: "ajay.12322931@lpu.in"
+              valueFrom:
+                secretKeyRef:
+                  name: eduvibe-secrets
+                  key: ADMIN_EMAIL
             - name: ADMIN_PASSWORD
-              value: "123456"
+              valueFrom:
+                secretKeyRef:
+                  name: eduvibe-secrets
+                  key: ADMIN_PASSWORD
             - name: RESEND_API_KEY
               valueFrom:
                 secretKeyRef:

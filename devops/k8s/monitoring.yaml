@@ -98,9 +98,17 @@ spec:
             - containerPort: 3000
           env:
             - name: GF_SECURITY_ADMIN_USER
-              value: "admin"
+              valueFrom:
+                secretKeyRef:
+                  name: eduvibe-secrets
+                  key: GRAFANA_ADMIN_USER
+                  optional: true
             - name: GF_SECURITY_ADMIN_PASSWORD
-              value: "admin"
+              valueFrom:
+                secretKeyRef:
+                  name: eduvibe-secrets
+                  key: GRAFANA_ADMIN_PASSWORD
+                  optional: true
             - name: GF_SERVER_SERVE_FROM_SUB_PATH
               value: "true"
           resources:

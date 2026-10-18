@@ -28,9 +28,17 @@ spec:
             - name: ME_CONFIG_BASICAUTH
               value: "true"
             - name: ME_CONFIG_BASICAUTH_USERNAME
-              value: "admin"
+              valueFrom:
+                secretKeyRef:
+                  name: eduvibe-secrets
+                  key: MONGO_EXPRESS_USER
+                  optional: true
             - name: ME_CONFIG_BASICAUTH_PASSWORD
-              value: "EduVibeSecure2026!"
+              valueFrom:
+                secretKeyRef:
+                  name: eduvibe-secrets
+                  key: MONGO_EXPRESS_PASSWORD
+                  optional: true
           resources:
             requests:
               memory: "64Mi"

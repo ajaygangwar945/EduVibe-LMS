@@ -36,8 +36,8 @@ services:
       - ME_CONFIG_MONGODB_PORT=27017
       # Security: Enforce basic authentication to prevent unauthenticated database manipulation
       - ME_CONFIG_BASICAUTH=true
-      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_EXPRESS_USER:-admin}
-      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_EXPRESS_PASSWORD:-EduVibeSecure2026!}
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_EXPRESS_USER}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_EXPRESS_PASSWORD}
     depends_on:
       mongo:
         condition: service_healthy
@@ -58,9 +58,9 @@ services:
     environment:
       - PORT=5000
       - MONGO_URI=${MONGO_URI}
-      - JWT_SECRET=${JWT_SECRET:-eduvibe_docker_jwt_key_2026}
-      - ADMIN_EMAIL=${ADMIN_EMAIL:-ajay.12322931@lpu.in}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-123456}
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - RESEND_API_KEY=${RESEND_API_KEY}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:5000/api/health || exit 1"]
@@ -116,8 +116,8 @@ services:
     ports:
       - "3001:3000"
     environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-EduVibeGrafana2026!}
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
     depends_on:
       - prometheus
     networks:
