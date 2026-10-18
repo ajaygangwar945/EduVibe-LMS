@@ -25,10 +25,11 @@ TABLE OF CONTENTS:
    3.9. CI/CD Pipeline: GitHub Actions (Dynamic EC2 IP Discovery)
    3.10. Container Orchestration: Kubernetes
 4. FULL SYSTEM ARCHITECTURE & DATA FLOW
-5. THREE WAYS TO DEPLOY & RUN
+5. FOUR WAYS TO DEPLOY & RUN
    5.1. Method 1: Local Development (Bare-Metal / npm)
-   5.2. Method 2: Docker Container Deployment (Docker Compose)
-   5.3. Method 3: Cloud Production Deployment (AWS + Vercel)
+   5.2. Method 2: Docker Container Deployment (Docker Compose & Minikube)
+   5.3. Method 3: Cloud Infrastructure Deployment (AWS EC2 + Terraform IaC + GitHub Actions)
+   5.4. Method 4: Production Cloud Tier (Vercel + Render + MongoDB Atlas)
 6. COMPLETE REST API ENDPOINTS REFERENCE
 7. DATABASE SCHEMA & DATA MODELS
 8. DEFAULT DEMO CREDENTIALS & ACCESS
@@ -436,6 +437,51 @@ Step 3: Launch Containers on AWS EC2
 Step 4: Cost Management / Teardown
 - Pause EC2: `aws ec2 stop-instances --instance-ids <INSTANCE_ID>`
 - Destroy everything: `cd devops/terraform && terraform destroy -auto-approve`
+
+--------------------------------------------------------------------------------
+5.4. Method 4: Production Cloud Tier (Vercel + Render + MongoDB Atlas)
+--------------------------------------------------------------------------------
+Live, permanent production deployment requiring $0.00 infrastructure cost.
+
+Active Production Architecture:
+┌──────────────────────────────────────┐
+│       Vercel Global Edge CDN         │
+│   https://edu-vibe-lms.vercel.app    │
+└──────────────────┬───────────────────┘
+                   │ /api/* Reverse Proxy (vercel.json)
+                   ▼
+┌──────────────────────────────────────┐     ┌───────────────────────────────┐
+│      Render Docker Web Service       │────▶│  Resend Transactional Email   │
+│ eduvibe-lms-backend-api.onrender.com │     │  Delivers 6-Digit OTP to User │
+└──────────────────┬───────────────────┘     └───────────────────────────────┘
+                   │ TLS Cloud Connection
+                   ▼
+┌──────────────────────────────────────┐
+│       MongoDB Atlas Cloud M0         │
+│      cluster0.0xjeu.mongodb.net      │
+└──────────────────────────────────────┘
+
+Production Links:
+- Live Web Portal:    https://edu-vibe-lms.vercel.app/
+- Live Backend API:   https://eduvibe-lms-backend-api.onrender.com/
+- API Health Check:   https://eduvibe-lms-backend-api.onrender.com/api/health
+- Prometheus Metrics: https://eduvibe-lms-backend-api.onrender.com/metrics
+
+Live Verification Script (Run from any terminal):
+```powershell
+# 1. Test live backend response (HTTP 200 OK)
+Invoke-RestMethod -Uri "https://eduvibe-lms-backend-api.onrender.com/api/health"
+
+# 2. Test live OTP request for password reset (Sends real email via Resend)
+$payload = @{ email = "ajaygangwar945@gmail.com"; purpose = "password_reset" } | ConvertTo-Json
+Invoke-RestMethod -Uri "https://eduvibe-lms-backend-api.onrender.com/api/auth/send-otp" `
+  -Method Post -Body $payload -ContentType "application/json"
+```
+
+Lifecycle Management:
+- Always live 24/7 with zero server bills.
+- PaaS auto-sleeps on idle and wakes up instantly on incoming traffic.
+- Zero maintenance required.
 
 
 ================================================================================

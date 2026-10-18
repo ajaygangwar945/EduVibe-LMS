@@ -43,14 +43,13 @@ The frontend is served globally via **Vercel Edge**, while the backend, database
 
 | Service | Provider | URL | Notes |
 | :--- | :--- | :--- | :--- |
-| 🎓 **Live Web Portal** | **Vercel** | [https://edu-vibe-lms.vercel.app/](https://edu-vibe-lms.vercel.app/) | Production React SPA |
-| ⚡ **Backend Health API** | **AWS EC2** | `http://<YOUR_AWS_ELASTIC_IP>:5000/api/health` | REST API health status |
-| 🎬 **Media CDN** | **CloudFront** | `https://d1dionuk6xtudv.cloudfront.net` | Fast video & PDF streaming |
-| 🍃 **MongoDB Web GUI** | **AWS EC2** | `http://<YOUR_AWS_ELASTIC_IP>:8081` | Mongo Express explorer |
-| 📊 **Prometheus** | **AWS EC2** | `http://<YOUR_AWS_ELASTIC_IP>:9090` | API telemetry scrape target |
-| 📈 **Grafana** | **AWS EC2** | `http://<YOUR_AWS_ELASTIC_IP>:3001` | Live performance dashboards |
+| 🎓 **Live Web Portal** | **Vercel** | [https://edu-vibe-lms.vercel.app/](https://edu-vibe-lms.vercel.app/) | Production React SPA (Global Edge) |
+| ⚡ **Live Production API** | **Render** | [https://eduvibe-lms-backend-api.onrender.com/api/health](https://eduvibe-lms-backend-api.onrender.com/api/health) | 24/7 Live PaaS API + Resend OTP Email |
+| ☁️ **AWS Backend API** | **AWS EC2** | `http://<YOUR_AWS_PUBLIC_IP>:5000/api/health` | Containerized Express API on EC2 |
+| 📊 **Prometheus Metrics**| **Render / AWS** | `https://eduvibe-lms-backend-api.onrender.com/metrics` | Real-time API telemetry metrics |
+| 📈 **Grafana Dashboard** | **AWS EC2** | `http://<YOUR_AWS_PUBLIC_IP>:3001` | Live performance telemetry dashboard |
 
-> *(For security, the public IP is shown as `<YOUR_AWS_ELASTIC_IP>`. Replace it with your actual AWS Elastic IP).*
+> *(For AWS endpoints, replace `<YOUR_AWS_PUBLIC_IP>` with your live EC2 Public IP or run `terraform output`).*
 
 ---
 
