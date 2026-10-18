@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "http://54.173.124.101:5000/api/:path*"
+      "destination": "https://eduvibe-lms-backend-api.onrender.com/api/:path*"
     },
     {
       "source": "/uploads/:path*",
-      "destination": "http://54.173.124.101:5000/uploads/:path*"
+      "destination": "https://eduvibe-lms-backend-api.onrender.com/uploads/:path*"
     },
     {
       "source": "/(.*)",
