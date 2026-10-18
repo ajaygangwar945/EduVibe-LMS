@@ -44,9 +44,15 @@ spec:
             - name: JWT_SECRET
               value: "eduvibe_k8s_secret_key_2026"
             - name: ADMIN_EMAIL
-              value: "admin@eduvibe.com"
+              value: "ajay.12322931@lpu.in"
             - name: ADMIN_PASSWORD
-              value: "AdminSecure2026!"
+              value: "123456"
+            - name: RESEND_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: eduvibe-secrets
+                  key: RESEND_API_KEY
+                  optional: true
           volumeMounts:
             - name: uploads-storage
               mountPath: /app/uploads
