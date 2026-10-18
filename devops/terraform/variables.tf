@@ -22,12 +22,6 @@ variable "instance_type" {
   default     = "t2.micro"
 }
 
-variable "alert_email" {
-  description = "Email address for SNS notifications (approvals and high CPU alarms)"
-  type        = string
-  default     = "admin@eduvibe.com"
-}
-
 variable "admin_cidr_blocks" {
   description = "Allowed CIDR IP ranges for administrative interfaces (SSH, Prometheus, Grafana). Set to your IP (e.g. ['203.0.113.50/32']) in production."
   type        = list(string)

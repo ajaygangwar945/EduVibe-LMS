@@ -16,46 +16,10 @@ resource "aws_iam_role" "eduvibe_ec2_role" {
   })
 }
 
-# Attach Amazon S3 Access Policy
-resource "aws_iam_policy" "eduvibe_s3_policy" {
-  name        = "${var.project_name}-s3-policy"
-  description = "Allows EC2 instance to upload and read PDFs/videos from S3"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject",
-          "s3:ListBucket"
-        ]
-        Effect   = "Allow"
-        Resource = [
-          "${aws_s3_bucket.eduvibe_storage.arn}",
-          "${aws_s3_bucket.eduvibe_storage.arn}/*"
-        ]
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "attach_s3" {
+# Attach AWS Systems Manager policy (AWS Best Practice for secure EC2 management)
+resource "aws_iam_role_policy_attachment" "attach_ssm" {
   role       = aws_iam_role.eduvibe_ec2_role.name
-  policy_arn = aws_iam_policy.eduvibe_s3_policy.arn
-}
-
-# Attach Amazon ECR Container Registry Access Policy (Read & Write)
-resource "aws_iam_role_policy_attachment" "attach_ecr" {
-  role       = aws_iam_role.eduvibe_ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
-}
-
-# Attach CloudWatch Server Policy for Metrics
-resource "aws_iam_role_policy_attachment" "attach_cloudwatch" {
-  role       = aws_iam_role.eduvibe_ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 # Instance Profile to attach the Role to EC2

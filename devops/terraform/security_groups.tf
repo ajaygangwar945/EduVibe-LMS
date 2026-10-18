@@ -1,6 +1,6 @@
 resource "aws_security_group" "eduvibe_sg" {
   name        = "${var.project_name}-sg"
-  description = "Security group for EduVibe web app, API, and Monitoring"
+  description = "Security group for EduVibe web app, API, Jenkins, and Monitoring"
   vpc_id      = data.aws_vpc.default.id
 
   # SSH remote terminal access
