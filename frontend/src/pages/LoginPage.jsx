@@ -237,9 +237,6 @@ export default function LoginPage() {
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--text-main)' }}>
                   🔑 Reset Account Password
                 </h3>
-                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: '0.25rem 0 0 0' }}>
-                  Available for all registered accounts ({activeRole.toUpperCase()}, Faculty & Students).
-                </p>
               </div>
 
               {resetError && (
