@@ -18,16 +18,6 @@ output "backend_api_url" {
   value       = "http://${aws_instance.eduvibe_server.public_ip}:5000"
 }
 
-output "mongo_express_url" {
-  description = "Public URL for MongoDB Visual Web Explorer"
-  value       = "http://${aws_instance.eduvibe_server.public_ip}:8081"
-}
-
-output "jenkins_url" {
-  description = "Public URL for Jenkins CI/CD Dashboard"
-  value       = "http://${aws_instance.eduvibe_server.public_ip}:8080"
-}
-
 output "s3_bucket_name" {
   description = "Amazon S3 Bucket created for PDF & Video storage"
   value       = aws_s3_bucket.eduvibe_storage.bucket

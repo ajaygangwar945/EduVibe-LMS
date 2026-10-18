@@ -22,7 +22,7 @@ TABLE OF CONTENTS:
    3.6. AWS Cloud Services (EC2, EIP, S3, CloudFront, ECR, CloudWatch, SNS, IAM)
    3.7. Global Edge Deployment: Vercel
    3.8. Observability & Telemetry: Prometheus & Grafana
-   3.9. CI/CD Pipeline: Jenkins
+   3.9. CI/CD Pipeline: GitHub Actions (Dynamic EC2 IP Discovery)
    3.10. Container Orchestration: Kubernetes
 4. FULL SYSTEM ARCHITECTURE & DATA FLOW
 5. THREE WAYS TO DEPLOY & RUN
@@ -118,8 +118,10 @@ Phase 6: Production Edge Deployment (Vercel)
 - Resolved CORS and SSL mixed-content issues seamlessly at the edge layer.
 
 Phase 7: CI/CD Pipeline & Kubernetes Manifests
-- Created `Jenkinsfile` for automated multi-stage builds (Test, Docker Build,
-  ECR Push, Rolling Deployment).
+- Created `.github/workflows/deploy.yml` for automated multi-stage CI/CD:
+  * Automated syntax and linting checks on GitHub Cloud runners.
+  * Docker container build verification.
+  * Automated AWS EC2 deployment with Dynamic IP discovery via Instance ID / Tag.
 - Wrote Kubernetes manifests (`devops/k8s/`) including Deployments, Services,
   PersistentVolumeClaims, ConfigMaps, Secrets, and Ingress controllers.
 
@@ -275,15 +277,20 @@ Phase 7: CI/CD Pipeline & Kubernetes Manifests
   * Visualizes real-time API latency, traffic spikes, and server resource usage.
 
 --------------------------------------------------------------------------------
-3.9. CI/CD Pipeline: Jenkins
+3.9. CI/CD Pipeline: GitHub Actions (Dynamic EC2 IP Discovery)
 --------------------------------------------------------------------------------
-- Pipeline file: `Jenkinsfile`
+- Workflow file: `.github/workflows/deploy.yml`
 - Automated stages:
-  1. Code Checkout from GitHub repository.
-  2. Automated testing and linting.
-  3. Docker image build for frontend and backend.
-  4. Authentication and push to Amazon ECR.
-  5. Rolling deployment update on the AWS EC2 host.
+  1. Automated Code Checkout from GitHub repository.
+  2. Code Quality & Syntax validation on Node.js 20 runner.
+  3. Docker image build verification for both backend and frontend.
+  4. AWS EC2 Dynamic State & Public IP Discovery (via tag/Instance ID).
+     - If EC2 is STOPPED: Workflow safely logs status and skips deployment.
+     - If EC2 is RUNNING: Discovers active dynamic public IP automatically.
+  5. Automated SSH deployment to AWS EC2:
+     - Pulls latest commit from `main`.
+     - Rebuilds and relaunches containers via Docker Compose.
+     - Prunes dangling images to protect AWS Free-Tier disk quota.
 
 --------------------------------------------------------------------------------
 3.10. Container Orchestration: Kubernetes

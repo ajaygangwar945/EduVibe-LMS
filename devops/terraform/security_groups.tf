@@ -1,6 +1,6 @@
 resource "aws_security_group" "eduvibe_sg" {
   name        = "${var.project_name}-sg"
-  description = "Security group for EduVibe web app, API, Jenkins, and Monitoring"
+  description = "Security group for EduVibe web app, API, and Monitoring"
   vpc_id      = data.aws_vpc.default.id
 
   # SSH remote terminal access
@@ -46,24 +46,6 @@ resource "aws_security_group" "eduvibe_sg" {
     to_port     = 5000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Jenkins CI/CD Server
-  ingress {
-    description = "Jenkins CI/CD Dashboard"
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = var.admin_cidr_blocks
-  }
-
-  # Mongo Express Web Database Viewer
-  ingress {
-    description = "Mongo Express Web GUI"
-    from_port   = 8081
-    to_port     = 8081
-    protocol    = "tcp"
-    cidr_blocks = var.admin_cidr_blocks
   }
 
   # Prometheus Server

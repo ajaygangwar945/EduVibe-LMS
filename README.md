@@ -263,17 +263,18 @@ EduVibe/
 │   ├── Dockerfile             # Lightweight Node.js Alpine container
 │   └── uploads/               # Persistent uploaded PDFs and videos
 │
+├── .github/
+│   └── workflows/
+│       └── deploy.yml         # GitHub Actions CI/CD with Dynamic EC2 IP Discovery
+│
 ├── devops/
 │   ├── terraform/             # AWS Infrastructure as Code (EC2, S3, CloudFront, ECR, IAM)
-│   ├── k8s/                   # Kubernetes manifests (Deployments, Services, Ingress, PVC)
-│   ├── monitoring/            # Prometheus scrape config & Grafana dashboards
-│   ├── docker-compose.yml     # Standalone devops compose config
-│   └── Jenkinsfile            # Multi-stage CI/CD pipeline
+│   ├── k8s/                   # Kubernetes manifests (Deployments, Services, PVC)
+│   └── monitoring/            # Prometheus scrape config & Grafana dashboards
 │
 ├── .dockerignore              # Docker build exclusions
 ├── .gitignore                 # Git ignore rules for secrets and node_modules
 ├── docker-compose.yml         # Main root multi-container configuration
-├── Jenkinsfile                # Root CI/CD automation pipeline
 ├── documentation.txt          # Complete in-depth technical manual & engineering guide
 └── README.md                  # Main project overview & quickstart guide
 ```
