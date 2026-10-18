@@ -101,7 +101,7 @@ flowchart TD
 
 ### How It Works:
 1. **Frontend Delivery**: Vercel serves the React SPA globally with zero latency.
-2. **Smart API Routing**: `client/vercel.json` proxies all `/api/*` and `/uploads/*` requests to our AWS Elastic IP on port 5000. This completely avoids CORS and mixed-content issues.
+2. **Smart API Routing**: `frontend/vercel.json` proxies all `/api/*` and `/uploads/*` requests to our AWS Elastic IP on port 5000. This completely avoids CORS and mixed-content issues.
 3. **Authentication**: Passwords are encrypted with Bcrypt. Logins return a signed JSON Web Token (JWT) that authorizes role-based dashboard access.
 4. **Media Streaming**: Lecture notes and videos upload to S3 and stream worldwide through Amazon CloudFront CDN.
 5. **Monitoring**: Node.js exports `/metrics`, Prometheus collects them every 5s, and Grafana displays live visual charts.
@@ -151,7 +151,7 @@ docker compose up -d mongo
 
 #### 2. Start Backend API (Terminal 1)
 ```powershell
-cd server
+cd backend
 npm install
 npm run dev
 ```
@@ -159,7 +159,7 @@ npm run dev
 
 #### 3. Start Frontend (Terminal 2)
 ```powershell
-cd client
+cd frontend
 npm install
 npm run dev
 ```
@@ -206,8 +206,8 @@ terraform apply -auto-approve
 *Creates EC2, Elastic IP, S3, CloudFront, ECR, CloudWatch, and Security Groups.*
 
 #### Step 2: Deploy Frontend on Vercel
-1. Import repository to Vercel (Root Directory: `client`, Preset: `Vite`).
-2. `client/vercel.json` automatically routes `/api/*` to the AWS Elastic IP.
+1. Import repository to Vercel (Root Directory: `frontend`, Preset: `Vite`).
+2. `frontend/vercel.json` automatically routes `/api/*` to the AWS Elastic IP.
 3. Access live: **[https://edu-vibe-lms.vercel.app/](https://edu-vibe-lms.vercel.app/)**
 
 #### Step 3: Run Containers on AWS EC2
@@ -245,7 +245,7 @@ EduVibe/
 ├── assets/
 │   └── eduvibe-banner.jpg      # Custom AI-generated hero banner image
 │
-├── client/                     # React 18 Frontend (Vite)
+├── frontend/                   # React 18 Frontend (Vite)
 │   ├── src/
 │   │   ├── pages/             # Login, Student, Faculty & Admin Dashboards
 │   │   ├── context/           # AuthContext (JWT session management)
@@ -255,7 +255,7 @@ EduVibe/
 │   ├── Dockerfile             # Multi-stage Nginx container build
 │   └── nginx.conf             # Nginx reverse proxy config
 │
-├── server/                     # Node.js Express Backend
+├── backend/                    # Node.js Express Backend
 │   ├── models/                # User, Course, Attendance, Quiz, Assignment
 │   ├── routes/                # auth.js, student.js, faculty.js, admin.js
 │   ├── middleware/            # JWT verification & Multer file uploads

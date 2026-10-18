@@ -1,10 +1,10 @@
 # Node Dependencies
 node_modules/
-client/node_modules/
-server/node_modules/
+frontend/node_modules/
+backend/node_modules/
 
 # Production Build Output
-client/dist/
+frontend/dist/
 
 # Terraform Cache & State files
 .terraform/
@@ -23,8 +23,8 @@ devops/terraform/.terraform/
 *.key
 
 # Local Uploaded PDFs & Videos
-server/uploads/*
-!server/uploads/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
 
 # Logs & Debug
 npm-debug.log*
@@ -46,3 +46,7 @@ Thumbs.db
 # Local Project Documentation & PDF generator (Excluded from Git)
 EduVibe_Three_Methods_To_Run_Projects.pdf
 generate_pdf_guide.py
+
+# Local Prometheus TSDB Runtime Database Cache
+data/
+

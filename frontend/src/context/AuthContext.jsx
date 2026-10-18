@@ -94,6 +94,25 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  // Administrator registration
+  const registerAdmin = async (adminData) => {
+    const res = await fetch('/api/auth/register-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(adminData),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Admin registration failed');
+    }
+
+    localStorage.setItem('eduvibe_token', data.token);
+    setToken(data.token);
+    setUser(data.user);
+    return data.user;
+  };
+
   // Logout
   const logout = () => {
     localStorage.removeItem('eduvibe_token');
@@ -110,6 +129,7 @@ export const AuthProvider = ({ children }) => {
         login,
         registerStudent,
         registerFaculty,
+        registerAdmin,
         logout,
       }}
     >

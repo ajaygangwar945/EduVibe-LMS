@@ -1,18 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-deployment
+  name: frontend
+  namespace: eduvibe
   labels:
-    app: eduvibe-frontend
+    app: frontend
 spec:
-  replicas: 2 # High Availability (2 copies of React frontend)
+  replicas: 1
   selector:
     matchLabels:
-      app: eduvibe-frontend
+      app: frontend
   template:
     metadata:
       labels:
-        app: eduvibe-frontend
+        app: frontend
     spec:
       containers:
         - name: frontend
@@ -22,35 +23,25 @@ spec:
             - containerPort: 80
           resources:
             requests:
-              cpu: 50m
-              memory: 64Mi
+              memory: "64Mi"
+              cpu: "50m"
             limits:
-              cpu: 250m
-              memory: 256Mi
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 10
-            periodSeconds: 15
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 5
-            periodSeconds: 5
+              memory: "128Mi"
+              cpu: "250m"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-service
+  name: frontend
+  namespace: eduvibe
   labels:
-    app: eduvibe-frontend
+    app: frontend
 spec:
   type: NodePort
+  selector:
+    app: frontend
   ports:
     - port: 80
       targetPort: 80
-      nodePort: 30005 # Exposes on port 30005 of your Kubernetes cluster
-  selector:
-    app: eduvibe-frontend
+      nodePort: 30080
+      protocol: TCP

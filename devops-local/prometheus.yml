@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  # 1. Scrape Prometheus internal metrics
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # 2. Scrape EduVibe Node.js API metrics running locally on port 5000 (NO DOCKER)
+  - job_name: 'eduvibe-backend'
+    scrape_interval: 5s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['localhost:5000']
+        labels:
+          app: 'eduvibe-backend'
+          env: 'local'

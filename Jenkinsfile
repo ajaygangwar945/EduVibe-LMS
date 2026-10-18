@@ -25,7 +25,7 @@ pipeline {
         stage('Code Quality & Security Scan') {
             steps {
                 echo '🧪 Running code checks and verifying backend syntax...'
-                dir('server') {
+                dir('backend') {
                     sh 'node -e "console.log(\'Backend syntax check passed\')"'
                 }
                 echo '🔒 Checking for accidental secret leaks...'
@@ -39,8 +39,8 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 echo '🐳 Building production Docker images for React and Node.js...'
-                sh 'docker build -t eduvibe-backend:${DOCKER_IMAGE_TAG} -t eduvibe-backend:latest ./server'
-                sh 'docker build -t eduvibe-frontend:${DOCKER_IMAGE_TAG} -t eduvibe-frontend:latest ./client'
+                sh 'docker build -t eduvibe-backend:${DOCKER_IMAGE_TAG} -t eduvibe-backend:latest ./backend'
+                sh 'docker build -t eduvibe-frontend:${DOCKER_IMAGE_TAG} -t eduvibe-frontend:latest ./frontend'
             }
         }
 

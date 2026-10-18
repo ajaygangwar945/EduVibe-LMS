@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import ThemeToggle from '../components/ThemeToggle';
+import {
+  ShieldIcon,
+  LogoutIcon,
+  AwardIcon,
+  ClockIcon,
+  UserIcon,
+  FileTextIcon,
+  CheckCircleIcon,
+  AlertCircleIcon,
+  SearchIcon,
+} from '../components/Icons';
 
 export default function AdminDashboard() {
   const { user, token, logout } = useAuth();
@@ -139,25 +151,31 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', paddingBottom: '3rem' }}>
+    <div className="portal-admin" style={{ minHeight: '100vh', paddingBottom: '3rem' }}>
       
       {/* Top Navbar */}
       <nav className="navbar">
         <div className="nav-brand">
-          <span>🛡️</span> EduVibe Admin Console
+          <ShieldIcon size={26} color="var(--admin-primary)" />
+          <span>EduVibe Admin Console</span>
         </div>
         <div className="nav-profile">
-          <div className="user-pill">
-            <div className="avatar-circle" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)' }}>
-              A
+          <ThemeToggle />
+          <div className="nav-btn nav-user-btn" title="Administrator Profile">
+            <div className="avatar-circle nav-avatar">
+              {user?.name?.charAt(0) || 'A'}
             </div>
-            <div>
-              <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>System Administrator</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>admin@eduvibe.com</div>
-            </div>
+            <span className="nav-user-name">{user?.name || 'Administrator'}</span>
           </div>
-          <button onClick={logout} className="btn btn-secondary btn-sm">
-            🚪 Logout
+          <button
+            type="button"
+            onClick={logout}
+            className="nav-btn nav-logout-btn"
+            title="Logout"
+            aria-label="Logout"
+          >
+            <LogoutIcon size={15} />
+            <span>Logout</span>
           </button>
         </div>
       </nav>
@@ -173,17 +191,25 @@ export default function AdminDashboard() {
               borderRadius: 'var(--radius-md)',
               marginBottom: '1.5rem',
               background: actionMsg.type === 'success' ? 'var(--success-bg)' : 'var(--danger-bg)',
-              color: actionMsg.type === 'success' ? '#34d399' : '#f87171',
+              color: actionMsg.type === 'success' ? 'var(--success)' : 'var(--danger)',
               border: `1px solid ${actionMsg.type === 'success' ? 'var(--success)' : 'var(--danger)'}`,
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
+              fontWeight: 500,
             }}
           >
-            <span>{actionMsg.text}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              {actionMsg.type === 'success' ? (
+                <CheckCircleIcon size={18} color="var(--success)" />
+              ) : (
+                <AlertCircleIcon size={18} color="var(--danger)" />
+              )}
+              <span>{actionMsg.text}</span>
+            </div>
             <button
               onClick={() => setActionMsg({ type: '', text: '' })}
-              style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontWeight: 700 }}
+              style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontWeight: 700, fontSize: '1rem' }}
             >
               ✕
             </button>
@@ -196,7 +222,8 @@ export default function AdminDashboard() {
             className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
             onClick={() => setActiveTab('overview')}
           >
-            📈 Overview & Stats
+            <AwardIcon size={16} />
+            <span>Overview & Stats</span>
           </button>
           <button
             className={`tab-btn ${activeTab === 'approvals' ? 'active' : ''}`}
@@ -205,77 +232,82 @@ export default function AdminDashboard() {
               fetchPendingFaculty();
             }}
           >
-            ⏳ Pending Faculty Approvals ({pendingFaculty.length})
+            <ClockIcon size={16} />
+            <span>Pending Faculty Approvals ({pendingFaculty.length})</span>
           </button>
           <button
             className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
             onClick={() => setActiveTab('users')}
           >
-            👥 User Directory
+            <UserIcon size={16} />
+            <span>User Directory</span>
           </button>
           <button
             className={`tab-btn ${activeTab === 'reports' ? 'active' : ''}`}
             onClick={() => setActiveTab('reports')}
           >
-            📑 Institutional Reports
+            <FileTextIcon size={16} />
+            <span>Institutional Reports</span>
           </button>
         </div>
 
         {/* TAB 1: OVERVIEW & STATS */}
         {activeTab === 'overview' && (
           <div>
-            <div style={{ marginBottom: '1.75rem' }}>
-              <h2>Campus Administration Overview</h2>
-              <p style={{ color: 'var(--text-muted)' }}>Real-time statistics across all departments and academic roles</p>
+            <div className="dashboard-section-header">
+              <div>
+                <h2>Campus Administration Overview</h2>
+                <p>Real-time statistics across all departments and academic roles</p>
+              </div>
             </div>
 
             <div className="grid-cols-3" style={{ marginBottom: '2rem' }}>
-              <div className="glass-card" style={{ borderLeft: '4px solid #6366f1' }}>
+              <div className="glass-card" style={{ borderLeft: '4px solid var(--student-primary)' }}>
                 <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Total Registered Students</div>
                 <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.25rem' }}>
                   {stats?.totalStudents || 0}
                 </div>
-                <div style={{ color: '#34d399', fontSize: '0.8rem', marginTop: '0.5rem' }}>✓ Active & Enrolled</div>
+                <div style={{ color: 'var(--success)', fontSize: '0.825rem', marginTop: '0.5rem', fontWeight: 600 }}>✓ Active & Enrolled</div>
               </div>
 
-              <div className="glass-card" style={{ borderLeft: '4px solid #10b981' }}>
+              <div className="glass-card" style={{ borderLeft: '4px solid var(--faculty-primary)' }}>
                 <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Active Faculty Members</div>
                 <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.25rem' }}>
                   {stats?.totalFaculty || 0}
                 </div>
-                <div style={{ color: '#38bdf8', fontSize: '0.8rem', marginTop: '0.5rem' }}>✓ Approved by Admin</div>
+                <div style={{ color: 'var(--info)', fontSize: '0.825rem', marginTop: '0.5rem', fontWeight: 600 }}>✓ Approved by Admin</div>
               </div>
 
-              <div className="glass-card" style={{ borderLeft: '4px solid #f59e0b' }}>
+              <div className="glass-card" style={{ borderLeft: '4px solid var(--warning)' }}>
                 <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Pending Faculty Approvals</div>
-                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: '#fbbf24', marginTop: '0.25rem' }}>
+                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--warning)', marginTop: '0.25rem' }}>
                   {stats?.pendingFaculty || 0}
                 </div>
-                <div style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>
+                <div style={{ fontSize: '0.85rem', marginTop: '0.5rem' }}>
                   <button
                     onClick={() => setActiveTab('approvals')}
-                    style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600, padding: 0 }}
+                    style={{ background: 'none', border: 'none', color: 'var(--admin-primary)', cursor: 'pointer', fontWeight: 600, padding: 0 }}
                   >
                     Review requests →
                   </button>
                 </div>
               </div>
 
-              <div className="glass-card" style={{ borderLeft: '4px solid #0ea5e9' }}>
+              <div className="glass-card" style={{ borderLeft: '4px solid var(--admin-primary)' }}>
                 <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Total Academic Courses</div>
                 <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.25rem' }}>
                   {stats?.totalCourses || 0}
                 </div>
-                <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', marginTop: '0.5rem' }}>Active Syllabus Catalog</div>
+                <div style={{ color: 'var(--text-dim)', fontSize: '0.825rem', marginTop: '0.5rem' }}>Active Syllabus Catalog</div>
               </div>
             </div>
 
             {/* Quick Action Pending Notice */}
             {pendingFaculty.length > 0 && (
-              <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid rgba(245, 158, 11, 0.4)', background: 'rgba(245, 158, 11, 0.05)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid var(--warning)', background: 'var(--warning-bg)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                   <div>
-                    <h3 style={{ color: '#fbbf24', fontSize: '1.15rem' }}>⚠️ Action Required: Pending Teacher Approvals</h3>
+                    <h3 style={{ color: 'var(--warning)', fontSize: '1.15rem' }}>⚠️ Action Required: Pending Teacher Approvals</h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
                       There are {pendingFaculty.length} faculty registration requests waiting for official registration numbers and activation.
                     </p>
@@ -292,11 +324,13 @@ export default function AdminDashboard() {
         {/* TAB 2: PENDING FACULTY APPROVALS */}
         {activeTab === 'approvals' && (
           <div>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <h2>Pending Faculty Approvals</h2>
-              <p style={{ color: 'var(--text-muted)' }}>
-                Verify teacher credentials, assign their official Registration Number, and activate their access
-              </p>
+            <div className="dashboard-section-header">
+              <div>
+                <h2>Pending Faculty Approvals</h2>
+                <p>
+                  Verify teacher credentials, assign their official Registration Number, and activate their access
+                </p>
+              </div>
             </div>
 
             <div className="glass-panel" style={{ padding: '1.5rem' }}>
@@ -363,10 +397,10 @@ export default function AdminDashboard() {
         {/* TAB 3: USER DIRECTORY */}
         {activeTab === 'users' && (
           <div>
-            <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="dashboard-section-header">
               <div>
                 <h2>Campus User Directory</h2>
-                <p style={{ color: 'var(--text-muted)' }}>View registered students, faculty, and administrative staff</p>
+                <p>View registered students, faculty, and administrative staff</p>
               </div>
 
               <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -440,9 +474,11 @@ export default function AdminDashboard() {
         {/* TAB 4: REPORTS */}
         {activeTab === 'reports' && (
           <div>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <h2>Institutional Academic Reports</h2>
-              <p style={{ color: 'var(--text-muted)' }}>Course enrollments, study materials uploaded, and total attendance records</p>
+            <div className="dashboard-section-header">
+              <div>
+                <h2>Institutional Academic Reports</h2>
+                <p>Course enrollments, study materials uploaded, and total attendance records</p>
+              </div>
             </div>
 
             <div className="glass-panel" style={{ padding: '1.5rem' }}>

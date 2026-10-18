@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import StudentDashboard from './pages/StudentDashboard';
 import FacultyDashboard from './pages/FacultyDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import AnimatedBackground from './components/AnimatedBackground';
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -45,7 +46,10 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <AnimatedBackground />
+      <div className="app-main-content">
+        <AppContent />
+      </div>
     </AuthProvider>
   );
 }

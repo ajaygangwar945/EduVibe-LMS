@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eduvibe
+  labels:
+    app.kubernetes.io/name: eduvibe
+    app.kubernetes.io/part-of: eduvibe-lms

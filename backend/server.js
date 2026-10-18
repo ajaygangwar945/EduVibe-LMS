@@ -78,6 +78,24 @@ app.use('/uploads', express.static(uploadsPath, {
   maxAge: '1d',
 }));
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    name: 'EduVibe LMS Backend API',
+    status: 'running',
+    version: '1.0.0',
+    frontendUrl: 'http://localhost:5173',
+    endpoints: {
+      health: '/api/health',
+      metrics: '/metrics',
+      auth: '/api/auth',
+      admin: '/api/admin',
+      faculty: '/api/faculty',
+      student: '/api/student',
+    },
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
@@ -105,66 +123,14 @@ app.use((err, req, res, next) => {
 });
 
 // -------------------------------------------------------------
-// Database Connection & Auto-Seed Function
+// Database Connection
 // -------------------------------------------------------------
-const User = require('./models/User');
-const Course = require('./models/Course');
-
-const seedDefaultData = async () => {
-  try {
-    // 1. Seed Default Admin if not exists
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@eduvibe.com';
-    const adminExists = await User.findOne({ email: adminEmail });
-
-    if (!adminExists) {
-      await User.create({
-        name: 'System Admin',
-        email: adminEmail,
-        password: process.env.ADMIN_PASSWORD || 'admin123',
-        role: 'admin',
-        regNumber: 'ADMIN-001',
-        department: 'Administration',
-        isApproved: true,
-      });
-      console.log(`[Seed] Default Admin account created (${adminEmail})`);
-    }
-
-    // 2. Seed Sample Approved Faculty if no faculty exist
-    const facultyCount = await User.countDocuments({ role: 'faculty' });
-    if (facultyCount === 0) {
-      const sampleFaculty = await User.create({
-        name: 'Dr. Robert Smith',
-        email: 'robert.smith@eduvibe.com',
-        password: 'password123',
-        role: 'faculty',
-        department: 'Computer Science',
-        regNumber: 'FAC-2026-1001',
-        isApproved: true,
-      });
-
-      // Seed Initial Sample Course
-      await Course.create({
-        title: 'Full-Stack Web Development',
-        code: 'CS301',
-        department: 'Computer Science',
-        description: 'Comprehensive course covering React, Node.js, Cloud deployment and DevOps.',
-        faculty: sampleFaculty._id,
-      });
-
-      console.log('[Seed] Sample faculty and starter course created.');
-    }
-  } catch (error) {
-    console.error('[Seed Error]:', error.message);
-  }
-};
-
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/eduvibe';
 
 mongoose
   .connect(MONGO_URI)
-  .then(async () => {
+  .then(() => {
     console.log(`[Database] MongoDB connected successfully to ${MONGO_URI}`);
-    await seedDefaultData();
   })
   .catch((err) => {
     console.warn(`[Database Warning] Could not connect to local MongoDB (${err.message}). When running in Docker/AWS, MongoDB container will connect automatically.`);

@@ -1,5 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import ThemeToggle from '../components/ThemeToggle';
+import {
+  TeacherIcon,
+  LogoutIcon,
+  BookOpenIcon,
+  CalendarCheckIcon,
+  ClipboardListIcon,
+  UploadCloudIcon,
+  PlusCircleIcon,
+  FileTextIcon,
+  VideoPlayIcon,
+  DownloadIcon,
+  CheckCircleIcon,
+  AlertCircleIcon,
+  ClockIcon,
+} from '../components/Icons';
 
 export default function FacultyDashboard() {
   const { user, token, logout } = useAuth();
@@ -355,25 +371,31 @@ export default function FacultyDashboard() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', paddingBottom: '3rem' }}>
+    <div className="portal-faculty" style={{ minHeight: '100vh', paddingBottom: '3rem' }}>
       
       {/* Top Navbar */}
       <nav className="navbar">
         <div className="nav-brand">
-          <span>👩‍🏫</span> EduVibe Faculty Portal
+          <TeacherIcon size={26} color="var(--faculty-primary)" />
+          <span>EduVibe Faculty Portal</span>
         </div>
         <div className="nav-profile">
-          <div className="user-pill">
-            <div className="avatar-circle">
+          <ThemeToggle />
+          <div className="nav-btn nav-user-btn" title="Faculty Profile">
+            <div className="avatar-circle nav-avatar">
               {user?.name?.charAt(0) || 'F'}
             </div>
-            <div>
-              <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>{user?.name}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{user?.regNumber || 'Faculty'}</div>
-            </div>
+            <span className="nav-user-name">{user?.name || 'Faculty'}</span>
           </div>
-          <button onClick={logout} className="btn btn-secondary btn-sm">
-            🚪 Logout
+          <button
+            type="button"
+            onClick={logout}
+            className="nav-btn nav-logout-btn"
+            title="Logout"
+            aria-label="Logout"
+          >
+            <LogoutIcon size={15} />
+            <span>Logout</span>
           </button>
         </div>
       </nav>
@@ -389,17 +411,25 @@ export default function FacultyDashboard() {
               borderRadius: 'var(--radius-md)',
               marginBottom: '1.5rem',
               background: actionMsg.type === 'success' ? 'var(--success-bg)' : 'var(--danger-bg)',
-              color: actionMsg.type === 'success' ? '#34d399' : '#f87171',
+              color: actionMsg.type === 'success' ? 'var(--success)' : 'var(--danger)',
               border: `1px solid ${actionMsg.type === 'success' ? 'var(--success)' : 'var(--danger)'}`,
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
+              fontWeight: 500,
             }}
           >
-            <span>{actionMsg.text}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              {actionMsg.type === 'success' ? (
+                <CheckCircleIcon size={18} color="var(--success)" />
+              ) : (
+                <AlertCircleIcon size={18} color="var(--danger)" />
+              )}
+              <span>{actionMsg.text}</span>
+            </div>
             <button
               onClick={() => setActionMsg({ type: '', text: '' })}
-              style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontWeight: 700 }}
+              style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontWeight: 700, fontSize: '1rem' }}
             >
               ✕
             </button>
@@ -412,35 +442,39 @@ export default function FacultyDashboard() {
             className={`tab-btn ${activeTab === 'courses' ? 'active' : ''}`}
             onClick={() => setActiveTab('courses')}
           >
-            📖 My Subjects & Materials ({courses.length})
+            <BookOpenIcon size={16} />
+            <span>My Subjects ({courses.length})</span>
           </button>
           <button
             className={`tab-btn ${activeTab === 'attendance' ? 'active' : ''}`}
             onClick={() => setActiveTab('attendance')}
           >
-            ✅ Mark Attendance
+            <CalendarCheckIcon size={16} />
+            <span>Mark Attendance</span>
           </button>
           <button
             className={`tab-btn ${activeTab === 'quizzes' ? 'active' : ''}`}
             onClick={() => setActiveTab('quizzes')}
           >
-            📝 Quizzes ({quizzesList.length})
+            <ClipboardListIcon size={16} />
+            <span>Quizzes ({quizzesList.length})</span>
           </button>
           <button
             className={`tab-btn ${activeTab === 'assignments' ? 'active' : ''}`}
             onClick={() => setActiveTab('assignments')}
           >
-            📑 Assignments & Grading
+            <UploadCloudIcon size={16} />
+            <span>Assignments & Grading</span>
           </button>
         </div>
 
         {/* TAB 1: MY COURSES & MATERIALS */}
         {activeTab === 'courses' && (
           <div>
-            <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="dashboard-section-header">
               <div>
                 <h2>My Assigned Subjects</h2>
-                <p style={{ color: 'var(--text-muted)' }}>Upload lecture videos, PDF notes, and manage students</p>
+                <p>Upload lecture videos, PDF notes, and manage students</p>
               </div>
               <button onClick={() => setShowCourseModal(true)} className="btn btn-primary">
                 + Create New Course
@@ -489,23 +523,14 @@ export default function FacultyDashboard() {
                       ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                           {course.materials.map((mat, idx) => (
-                            <div
-                              key={idx}
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                background: 'rgba(15, 23, 42, 0.4)',
-                                padding: '0.5rem 0.75rem',
-                                borderRadius: 'var(--radius-sm)',
-                                fontSize: '0.85rem',
-                              }}
-                            >
+                            <div key={idx} className="course-material-item">
                               <span>{mat.type === 'video' ? '🎬' : '📄'} {mat.title}</span>
                               <a
                                 href={mat.fileUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                style={{ color: 'var(--primary)', fontWeight: 600, fontSize: '0.8rem' }}
+                                className="btn btn-secondary btn-sm"
+                                style={{ minHeight: '32px', padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}
                               >
                                 View
                               </a>
@@ -524,9 +549,11 @@ export default function FacultyDashboard() {
         {/* TAB 2: MARK ATTENDANCE */}
         {activeTab === 'attendance' && (
           <div>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <h2>Mark Daily Attendance</h2>
-              <p style={{ color: 'var(--text-muted)' }}>Select subject and date to mark presence of enrolled students</p>
+            <div className="dashboard-section-header">
+              <div>
+                <h2>Mark Daily Attendance</h2>
+                <p>Select subject and date to mark presence of enrolled students</p>
+              </div>
             </div>
 
             <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
@@ -625,10 +652,10 @@ export default function FacultyDashboard() {
         {/* TAB 3: QUIZZES */}
         {activeTab === 'quizzes' && (
           <div>
-            <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="dashboard-section-header">
               <div>
                 <h2>Quiz Management</h2>
-                <p style={{ color: 'var(--text-muted)' }}>Build interactive multiple-choice tests with timers</p>
+                <p>Build interactive multiple-choice tests with timers</p>
               </div>
               <button
                 onClick={() => {
@@ -664,21 +691,24 @@ export default function FacultyDashboard() {
                   <div key={quiz._id} className="glass-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                       <span className="badge badge-info">{quiz.course?.code}</span>
-                      <span className="badge badge-warning">⏱️ {quiz.durationMinutes} Mins</span>
+                      <span className="badge badge-warning" style={{ gap: '0.35rem' }}>
+                        <ClockIcon size={12} />
+                        <span>{quiz.durationMinutes} Mins</span>
+                      </span>
                     </div>
 
-                    <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{quiz.title}</h3>
+                    <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{quiz.title}</h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem' }}>
                       Questions: {quiz.questions?.length || 0} | Student Submissions: {quiz.submissions?.length || 0}
                     </p>
 
                     {quiz.submissions?.length > 0 && (
-                      <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem' }}>
-                        <strong>Submissions:</strong>
+                      <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-glass)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem' }}>
+                        <strong style={{ color: 'var(--text-main)' }}>Submissions:</strong>
                         {quiz.submissions.map((sub, sIdx) => (
                           <div key={sIdx} style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.3rem', color: 'var(--text-muted)' }}>
                             <span>Student ID: {sub.student?.toString().slice(-4)}</span>
-                            <span style={{ color: '#34d399', fontWeight: 600 }}>{sub.score} / {sub.totalPoints}</span>
+                            <span style={{ color: 'var(--success)', fontWeight: 600 }}>{sub.score} / {sub.totalPoints}</span>
                           </div>
                         ))}
                       </div>
@@ -693,10 +723,10 @@ export default function FacultyDashboard() {
         {/* TAB 4: ASSIGNMENTS & GRADING */}
         {activeTab === 'assignments' && (
           <div>
-            <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="dashboard-section-header">
               <div>
                 <h2>Assignments & Grading</h2>
-                <p style={{ color: 'var(--text-muted)' }}>Assign projects and grade student uploaded PDFs</p>
+                <p>Assign projects and grade student uploaded PDFs</p>
               </div>
               <button
                 onClick={() => {
@@ -770,13 +800,15 @@ export default function FacultyDashboard() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="btn btn-secondary btn-sm"
+                                    style={{ gap: '0.4rem' }}
                                   >
-                                    📄 Download PDF
+                                    <FileTextIcon size={14} color="var(--faculty-primary)" />
+                                    <span>View PDF</span>
                                   </a>
                                 </td>
                                 <td>
                                   {sub.marks !== null ? (
-                                    <span style={{ color: '#34d399', fontWeight: 700 }}>
+                                    <span style={{ color: 'var(--success)', fontWeight: 700 }}>
                                       {sub.marks} / {assign.maxMarks}
                                     </span>
                                   ) : (

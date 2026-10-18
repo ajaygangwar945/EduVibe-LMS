@@ -150,6 +150,63 @@ router.post('/register-faculty', rateLimitAuth, async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/register-admin
+// @desc    Register a new administrator account (immediately active)
+router.post('/register-admin', rateLimitAuth, async (req, res) => {
+  try {
+    const { name, email, password, phone, address, department } = req.body;
+
+    if (!name || typeof name !== 'string' || !email || typeof email !== 'string' || !password || typeof password !== 'string') {
+      return res.status(400).json({ success: false, message: 'Please provide valid name, email, and password.' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    const existingUser = await User.findOne({ email: cleanEmail });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Email is already registered.' });
+    }
+
+    const randomSuffix = Math.floor(100 + Math.random() * 900);
+    const regNumber = `ADM-${randomSuffix}`;
+
+    const admin = await User.create({
+      name: name.trim(),
+      email: cleanEmail,
+      password,
+      role: 'admin',
+      phone: typeof phone === 'string' ? phone.trim() : '',
+      address: typeof address === 'string' ? address.trim() : '',
+      department: typeof department === 'string' ? department.trim() : 'Administration',
+      regNumber,
+      isApproved: true,
+    });
+
+    const token = generateToken(admin._id);
+
+    res.status(201).json({
+      success: true,
+      message: 'Admin account created successfully!',
+      token,
+      user: {
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+        regNumber: admin.regNumber,
+        department: admin.department,
+      },
+    });
+  } catch (error) {
+    console.error('Error in admin registration:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // @route   POST /api/auth/login
 // @desc    Login for Student, Faculty, or Admin
 router.post('/login', rateLimitAuth, async (req, res) => {
