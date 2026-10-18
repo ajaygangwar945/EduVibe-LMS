@@ -5,7 +5,7 @@ pipeline {
         PROJECT_NAME     = 'eduvibe'
         AWS_REGION       = 'ap-south-1'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER ?: 'latest'}"
-        EC2_PUBLIC_IP    = '16.4.32.15'
+        ECR_REGISTRY     = '058264368450.dkr.ecr.ap-south-1.amazonaws.com'
     }
 
     stages {
@@ -69,24 +69,27 @@ pipeline {
                             bat "docker build -t eduvibe-frontend:${DOCKER_IMAGE_TAG} -t eduvibe-frontend:latest ./frontend"
                         }
                     } else {
-                        echo '⚠️ [INFO] Docker Desktop daemon is not running on this host.'
-                        echo 'ℹ️ Skipping local container build. (To build containers locally, launch Docker Desktop).'
+                        echo '================================================================='
+                        echo '❌ ERROR: Docker daemon / Docker Desktop is NOT running!'
+                        echo '💡 Please launch Docker Desktop on your machine and retry.'
+                        echo '================================================================='
+                        error('BUILD FAILED: Docker Desktop is not running. Please start Docker Desktop to build Docker images.')
                     }
                 }
             }
         }
 
         // ====================================================================
-        // Stage 4: Production Cloud Health & API Verification
+        // Stage 4: Verify Built Container Images
         // ====================================================================
-        stage('AWS Cloud Health Verification') {
+        stage('Container Image Verification') {
             steps {
-                echo "🩺 Verifying production AWS EC2 endpoint at http://${EC2_PUBLIC_IP}:5000/api/health..."
+                echo '🩺 Inspecting and verifying built Docker container images...'
                 script {
                     if (isUnix()) {
-                        sh "curl -s -f --connect-timeout 5 http://${EC2_PUBLIC_IP}:5000/api/health || echo 'Health check request complete'"
+                        sh 'docker images | grep eduvibe || true'
                     } else {
-                        bat "curl.exe -s --connect-timeout 5 http://${EC2_PUBLIC_IP}:5000/api/health"
+                        bat 'docker images | findstr eduvibe'
                     }
                 }
             }
