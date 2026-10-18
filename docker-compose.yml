@@ -57,7 +57,7 @@ services:
       - "5000:5000"
     environment:
       - PORT=5000
-      - MONGO_URI=${MONGO_URI:-mongodb+srv://ajaygangwar945:12322931Gangwar12@cluster0.0xjeu.mongodb.net/eduvibe?appName=Cluster0}
+      - MONGO_URI=${MONGO_URI}
       - JWT_SECRET=${JWT_SECRET:-eduvibe_docker_jwt_key_2026}
       - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@eduvibe.com}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-AdminSecure2026!}

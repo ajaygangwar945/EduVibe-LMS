@@ -37,7 +37,10 @@ spec:
             - name: PORT
               value: "5000"
             - name: MONGO_URI
-              value: "mongodb+srv://ajaygangwar945:12322931Gangwar12@cluster0.0xjeu.mongodb.net/eduvibe?appName=Cluster0"
+              valueFrom:
+                secretKeyRef:
+                  name: eduvibe-secrets
+                  key: MONGO_URI
             - name: JWT_SECRET
               value: "eduvibe_k8s_secret_key_2026"
             - name: ADMIN_EMAIL
