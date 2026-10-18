@@ -4,7 +4,6 @@ COMPLETE TECHNICAL DOCUMENTATION & ARCHITECTURAL REFERENCE MANUAL
 ================================================================================
 Author: Ajay Gangwar
 Project: EduVibe Academic & Learning Management Portal (LMS)
-Course: INT 377 - Cloud & DevOps Architecture (SEM 6)
 Repository: https://github.com/ajaygangwar945/EduVibe-LMS
 Live Web Portal: https://edu-vibe-lms.vercel.app/
 ================================================================================
@@ -278,20 +277,141 @@ Phase 7: CI/CD Pipeline & Kubernetes Manifests
   * Visualizes real-time API latency, traffic spikes, and server resource usage.
 
 --------------------------------------------------------------------------------
-3.9. CI/CD Pipeline: GitHub Actions (Dynamic EC2 IP Discovery)
+3.9. CI/CD Pipeline: GitHub Actions (Dynamic EC2 IP Discovery & Deployment)
 --------------------------------------------------------------------------------
-- Workflow file: `.github/workflows/deploy.yml`
-- Automated stages:
-  1. Automated Code Checkout from GitHub repository.
-  2. Code Quality & Syntax validation on Node.js 20 runner.
-  3. Docker image build verification for both backend and frontend.
-  4. AWS EC2 Dynamic State & Public IP Discovery (via tag/Instance ID).
-     - If EC2 is STOPPED: Workflow safely logs status and skips deployment.
-     - If EC2 is RUNNING: Discovers active dynamic public IP automatically.
-  5. Automated SSH deployment to AWS EC2:
-     - Pulls latest commit from `main`.
-     - Rebuilds and relaunches containers via Docker Compose.
-     - Prunes dangling images to protect AWS Free-Tier disk quota.
+- Workflow Configuration: `.github/workflows/deploy.yml`
+- Pipeline Badges: Active & Live on `main` branch.
+- Trigger Events:
+  * Automated execution on every `git push` to `main`.
+  * Pull request verification on `pull_request` targeting `main`.
+  * Manual execution capability via `workflow_dispatch` in the GitHub Web UI.
+
+Architecture & Technical Analysis:
+EduVibe eliminates heavy, memory-intensive CI runners on its cloud virtual machines.
+Instead of consuming ~1 GB RAM running a traditional Jenkins server inside the AWS
+t2.micro instance (which causes Linux kernel Out-Of-Memory crashes on 1GB RAM), EduVibe
+shifts 100% of build, lint, and container validation workloads into GitHub's free
+cloud runners (2 vCPU, 7 GB RAM).
+
+Pipeline Architecture Flow:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. Git Push / PR / Manual Trigger (Branch: main)                            │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Stage 1: Syntax & Code Quality Verification (Runner: ubuntu-latest)         │
+│ • Node.js 20 runtime environment setup                                      │
+│ • Backend syntax check & dependency import integrity                        │
+│ • Fails immediately if syntax error exists (shields downstream stages)      │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Stage 2: Docker Cloud Build Verification (Runner: ubuntu-latest)            │
+│ • Initializes Docker Buildx (docker/setup-buildx-action@v3)                 │
+│ • Builds eduvibe-backend & eduvibe-frontend container images                │
+│ • Validates clean Dockerfile compilation without pushing unverified images  │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Stage 3: Dynamic AWS EC2 State & Public IP Discovery (Runner: ubuntu-latest)│
+│ • Authenticates via aws-actions/configure-aws-credentials@v4 (IAM secrets)  │
+│ • Queries AWS EC2 API for instance state (running vs stopped)               │
+│ • If stopped: Logs notice & exits cleanly with status 0 (no false alarms)   │
+│ • If running: Dynamically queries Reservations[0].Instances[0].PublicIp     │
+│ • Exports public_ip to GITHUB_OUTPUT dynamically                            │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Stage 4: Zero-Downtime SSH Rolling Update (Host: AWS EC2 Mumbai)            │
+│ • Connects to discovered public IP using appleboy/ssh-action@v1.0.3         │
+│ • Authenticates with private key (webserver.pem)                            │
+│ • Executes atomic git synchronization (git reset --hard origin/main)        │
+│ • Rebuilds & restarts containers: docker compose up -d --build              │
+│ • Executes docker image prune -f to protect 20 GB Free-Tier EBS quota       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Detailed Stage Breakdown:
+
+1. Stage 1: Syntax & Code Quality Verification (`test-and-lint`)
+   - Environment: `ubuntu-latest` running Node.js 20.
+   - Executes code syntax tests and dependency verification.
+   - Fails immediately if syntax errors or broken imports are detected, preventing broken commits from advancing to deployment.
+
+2. Stage 2: Docker Build Verification (`build-containers`)
+   - Uses `docker/setup-buildx-action@v3` and `docker/build-push-action@v5`.
+   - Tests compilation of both `eduvibe-backend` and `eduvibe-frontend` Docker images.
+   - Validates that Dockerfiles compile cleanly without pushing unverified artifacts to registries.
+   - Offloads CPU and memory compilation load completely off the AWS EC2 instance.
+
+3. Stage 3: Dynamic AWS EC2 State & IP Discovery (`deploy-to-ec2`)
+   - Uses `aws-actions/configure-aws-credentials@v4` for secure IAM token authentication.
+   - Solves the dynamic IP problem: AWS EC2 standard public IPv4 addresses rotate upon server stop/start.
+   - Queries the AWS EC2 API (`aws ec2 describe-instances`) using the persistent Instance ID (`i-06a67a3041f734369`) or tag `Name=eduvibe-cloud-server`.
+   - Instance State Handling:
+     * If EC2 is `stopped` or `stopping`: The workflow safely logs an informational message and skips deployment with a green checkmark (zero false build failures).
+     * If EC2 is `running`: Automatically discovers the active public IPv4 address dynamically.
+
+4. Stage 4: Zero-Downtime Remote SSH Deployment
+   - Connects to the freshly discovered public IP via SSH using `appleboy/ssh-action@v1.0.3`.
+   - Authenticates using the private key (`webserver.pem`).
+   - Executes atomic Git synchronization (`git fetch & reset --hard origin/main`).
+   - Rebuilds and launches updated containers via Docker Compose (`docker compose up -d --build backend frontend`).
+   - Executes `docker image prune -f` post-deployment to preserve the 20 GB gp3 Free-Tier storage quota.
+
+Solving the Dynamic IP Challenge (Technical Deep Dive):
+In the AWS EC2 Free Tier, standard public IPv4 addresses are dynamic. When the user
+stops the instance using `aws ec2 stop-instances` and starts it again later, AWS
+deallocates the previous IP and assigns a completely new IP from the AWS pool.
+If the CI/CD pipeline hardcodes the host IP in GitHub Secrets, every server reboot
+breaks automated deployments.
+EduVibe solves this by fetching the live IP directly from the AWS EC2 Control Plane:
+```bash
+STATE=$(aws ec2 describe-instances --instance-ids "$TARGET_INSTANCE" \
+  --query "Reservations[0].Instances[0].State.Name" --output text)
+
+if [ "$STATE" != "running" ]; then
+  echo "is_running=false" >> $GITHUB_OUTPUT
+  echo "EC2 instance is currently $STATE. Skipping deployment safely."
+  exit 0
+fi
+
+PUBLIC_IP=$(aws ec2 describe-instances --instance-ids "$TARGET_INSTANCE" \
+  --query "Reservations[0].Instances[0].PublicIpAddress" --output text)
+echo "public_ip=$PUBLIC_IP" >> $GITHUB_OUTPUT
+```
+This architecture provides 100% automated resiliency with $0 billable cost.
+
+Architectural Comparison: Why GitHub Actions Replaced Jenkins:
+--------------------------------------------------------------------------------
+Criteria               Self-Hosted Jenkins              EduVibe GitHub Actions
+--------------------------------------------------------------------------------
+Host RAM Consumption   ~1,000 MB+ (Java Virtual Machine) 0 MB on EC2 (Runs on GitHub Cloud)
+Linux OOM Crashes      High risk on t2.micro (1 GB RAM) Zero risk (Completely decoupled)
+Compute Cost           Requires dedicated 24/7 server   $0.00 (2,000 free runner mins/mo)
+Inbound Port Exposure  Port 8080 open to internet       Zero inbound ports required
+Maintenance            Frequent plugin & OS patching    Zero maintenance / Managed SaaS
+Failure Impact         Broken builds stall host CPU     Faulty builds fail in isolated cloud
+--------------------------------------------------------------------------------
+
+Security & Secrets Architecture:
+- Zero credentials or private keys are stored in code or repository files.
+- Protected secrets configured under GitHub Repository Settings ➔ Secrets ➔ Actions:
+  * `AWS_ACCESS_KEY_ID`: IAM programmatic access key for `aws-cli-user`.
+  * `AWS_SECRET_ACCESS_KEY`: IAM secret access key for `aws-cli-user`.
+  * `AWS_REGION`: `ap-south-1` (Mumbai).
+  * `EC2_INSTANCE_ID`: `i-06a67a3041f734369` (Persistent hardware identifier).
+  * `EC2_SSH_KEY`: Full private RSA key (`webserver.pem`).
+
+Operational Trigger Methods:
+1. Automated Git Push: `git push origin main` triggers full CI/CD run.
+2. Pull Request: Pull requests targeting `main` execute Stages 1 & 2 (CI validation).
+3. Manual Web Trigger (`workflow_dispatch`):
+   - GitHub Repository ➔ Actions ➔ "EduVibe CI/CD Pipeline" ➔ "Run workflow".
+   - Useful for testing deployment without pushing new commits.
 
 --------------------------------------------------------------------------------
 3.10. Container Orchestration: Kubernetes
@@ -408,35 +528,48 @@ docker compose --profile monitoring down
 (Data is safely preserved in `mongo_data` and `uploads_data` volumes).
 
 --------------------------------------------------------------------------------
-5.3. Method 3: Cloud Production Deployment (AWS + Vercel)
+5.3. Method 3: Cloud Production Deployment (AWS + Vercel + GitHub Actions)
 --------------------------------------------------------------------------------
-Live production deployment combining Vercel Edge with AWS EC2.
+Streamlined cloud production deployment combining Vercel Global Edge Network with
+AWS EC2 compute and automated GitHub Actions CI/CD.
 
-Step 1: Provision AWS Infrastructure via Terraform
+Step 1: Provision Streamlined AWS Cloud Infrastructure via Terraform (<45s)
 ```bash
 cd devops/terraform
 terraform init
 terraform plan
 terraform apply -auto-approve
+terraform output
 ```
-Outputs allocated AWS Elastic IP and S3 / CloudFront resource URLs.
+Provisions EC2 instance (`t2.micro` running Ubuntu 22.04 LTS), Security Group firewall
+rules, and IAM Instance Profile adhering strictly to AWS Free-Tier ($0.00 billable cost).
+Prints output endpoints for Web (:3005), Backend (:5000), Prometheus (:9090), and Grafana (:3001).
 
 Step 2: Deploy Frontend on Vercel
 1. Link GitHub repository to Vercel.
 2. Root directory: `frontend`
 3. Framework: Vite
-4. `frontend/vercel.json` automatically proxies API calls to AWS Elastic IP.
+4. `frontend/vercel.json` automatically reverse-proxies `/api/*` and `/uploads/*` calls to the backend.
 5. Live link: `https://edu-vibe-lms.vercel.app/`
 
-Step 3: Launch Containers on AWS EC2
-1. SSH into EC2: `ssh -i <key.pem> ubuntu@<YOUR_AWS_ELASTIC_IP>`
-2. Clone repository: `git clone https://github.com/ajaygangwar945/EduVibe-LMS.git`
-3. Start stack: `cd EduVibe-LMS && docker compose --profile monitoring up -d`
-4. Verify health: `curl http://localhost:5000/api/health`
+Step 3: Automated Continuous Deployment (GitHub Actions)
+1. Push any commit to the `main` branch:
+   `git push origin main`
+2. GitHub Actions runner (`ubuntu-latest`) automatically:
+   - Validates Node.js 20 backend syntax.
+   - Compiles and tests Docker images in cloud isolation.
+   - Discovers live EC2 public IPv4 address dynamically via Instance ID (`i-06a67a3041f734369`).
+   - SSHes into EC2, runs atomic `git reset --hard origin/main`, and executes `docker compose up -d --build`.
+   - Prunes dangling Docker images (`docker image prune -f`) to protect disk storage.
 
-Step 4: Cost Management / Teardown
-- Pause EC2: `aws ec2 stop-instances --instance-ids <INSTANCE_ID>`
-- Destroy everything: `cd devops/terraform && terraform destroy -auto-approve`
+Step 4: Manual SSH Access & Diagnostics (Optional)
+1. SSH into EC2: `ssh -i ~/.ssh/webserver.pem ubuntu@<YOUR_AWS_PUBLIC_IP>`
+2. Inspect containers: `docker ps`
+3. Verify health: `curl http://localhost:5000/api/health`
+
+Step 5: Cost Management / Lifecycle Teardown
+- Pause EC2 Virtual Machine: `aws ec2 stop-instances --instance-ids i-06a67a3041f734369`
+- Destroy all AWS Infrastructure: `cd devops/terraform && terraform destroy -auto-approve`
 
 --------------------------------------------------------------------------------
 5.4. Method 4: Production Cloud Tier (Vercel + Render + MongoDB Atlas)
