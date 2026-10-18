@@ -21,13 +21,3 @@ resource "aws_instance" "eduvibe_server" {
     Name = "${var.project_name}-cloud-server"
   }
 }
-
-# Permanent Static Elastic IP (Never changes even if EC2 is stopped and restarted!)
-resource "aws_eip" "eduvibe_eip" {
-  instance = aws_instance.eduvibe_server.id
-  domain   = "vpc"
-
-  tags = {
-    Name = "${var.project_name}-permanent-elastic-ip"
-  }
-}
