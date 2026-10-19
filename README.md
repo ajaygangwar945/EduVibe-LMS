@@ -49,38 +49,49 @@ The project is fully deployed and accessible online.
 
 EduVibe is designed with a modern, decoupled cloud architecture that keeps the frontend fast, the backend scalable, and operations fully automated.
 
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        EDUVIBE SYSTEM ARCHITECTURE                          │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│   [ CLIENTS / END USERS ]                                                   │
-│   • Students            • Academic Faculty       • Master Administrator     │
-│         │                         │                        │                │
-│         └─────────────────────────┼────────────────────────┘                │
-│                                   │ HTTPS / TLS (Port 443)                  │
-│                                   ▼                                         │
-│   [ FRONTEND TIER: Vercel Global Edge CDN ]                                 │
-│   • React 18 SPA (Vite Engine) • Glassmorphism UI (Dark & Light Themes)     │
-│   • Edge Reverse Proxy: /api/* -> Backend API Service                       │
-│   • Session Management via React Context API & JWT Bearer Storage           │
-│         │                                                                   │
-│         │ REST API Calls (JSON & Bearer JWT)                                │
-│         ▼                                                                   │
-│   [ BACKEND API TIER: Node.js & Express Server (Port 5000) ]                │
-│   • JWT Authentication & Bcrypt Password Security                           │
-│   • Modular Controllers: /auth, /student, /faculty, /admin                  │
-│   • File Storage Handler: Multer Middleware (Course Notes & Video Uploads)  │
-│   • Telemetry Exporter: Prometheus /metrics Endpoint                        │
-│         │                                                                   │
-│         ├─────────────────────────┬────────────────────────┐                │
-│         │ Mongoose ODM (CRUD)     │ HTTPS API Calls (OTPs) │ Scrape /metrics│
-│         ▼                         ▼                        ▼                │
-│   [ DATABASE TIER ]        [ EMAIL SERVICE ]      [ OBSERVABILITY ]         │
-│   MongoDB Atlas Cloud      Resend Cloud API       Prometheus & Grafana      │
-│   Multi-Region Cluster     6-Digit Auth OTPs      Metrics & Live Dashboards │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Clients["🌐 End Users"]
+        Student["👨‍🎓 Students"]
+        Faculty["👩‍🏫 Faculty"]
+        Admin["🛡️ Admin"]
+    end
+
+    subgraph FrontendTier["⚡ Frontend Tier (Vercel Global Edge)"]
+        SPA["React 18 SPA (Vite)<br/>Modern Glassmorphism UI<br/>Tailored Dark & Light Themes"]
+        Proxy["Vercel Edge Reverse Proxy<br/>/api/* ➔ Backend Service<br/>/uploads/* ➔ Media Storage"]
+    end
+
+    subgraph BackendTier["⚙️ Backend API Tier (Node.js & Express)"]
+        API["Express.js REST API Server<br/>Port 5000"]
+        Auth["JWT Authentication &<br/>Bcrypt Password Security"]
+        Routes["Routes: Auth, Student,<br/>Faculty & Admin Operations"]
+        Metrics["Prometheus Exporter<br/>/metrics Endpoint"]
+    end
+
+    subgraph CloudServices["☁️ Cloud & Database Tier"]
+        Mongo["🍃 MongoDB Atlas Cloud Database<br/>Managed Multi-Region Replica Set"]
+        Resend["📧 Resend Email Microservice<br/>6-Digit Transactional OTP Delivery"]
+        S3["📦 AWS S3 + CloudFront CDN<br/>High-Speed Video & PDF Streaming"]
+    end
+
+    subgraph MonitoringTier["📊 Observability Tier"]
+        Prom["📈 Prometheus Scraper<br/>Gathers Latency & Request Rates"]
+        Graf["📉 Grafana Dashboards<br/>Real-Time Health & Traffic Visualizer"]
+    end
+
+    Clients -->|HTTPS Traffic| SPA
+    SPA --> Proxy
+    Proxy -->|API Calls| API
+    API --> Auth
+    API --> Routes
+    Routes <-->|Queries & Writes| Mongo
+    Routes -->|Send OTPs| Resend
+    Routes -->|Upload Notes / Videos| S3
+    S3 -.->|Stream Media| Clients
+    API -.-> Metrics
+    Metrics -.-> Prom
+    Prom --> Graf
 ```
 
 ---
