@@ -51,47 +51,21 @@ EduVibe is designed with a modern, decoupled cloud architecture that keeps the f
 
 ```mermaid
 flowchart TD
-    subgraph Clients["🌐 End Users"]
-        Student["👨‍🎓 Students"]
-        Faculty["👩‍🏫 Faculty"]
-        Admin["🛡️ Admin"]
+    Users["👥 End Users<br/>(Students, Faculty, Admin)"]
+    Frontend["⚡ Frontend Tier<br/>(React 18 + Vite SPA)"]
+    Backend["⚙️ Backend API Tier<br/>(Node.js & Express REST API)"]
+
+    subgraph CloudServices["☁️ Cloud Services & Observability"]
+        Database[("🍃 MongoDB Atlas<br/>Cloud Database")]
+        Email["📧 Resend Email API<br/>OTP Authentication"]
+        Monitoring["📊 Prometheus & Grafana<br/>Metrics & Dashboards"]
     end
 
-    subgraph FrontendTier["⚡ Frontend Tier (Vercel Global Edge)"]
-        SPA["React 18 SPA (Vite)<br/>Modern Glassmorphism UI<br/>Tailored Dark & Light Themes"]
-        Proxy["Vercel Edge Reverse Proxy<br/>/api/* ➔ Backend Service<br/>/uploads/* ➔ Media Storage"]
-    end
-
-    subgraph BackendTier["⚙️ Backend API Tier (Node.js & Express)"]
-        API["Express.js REST API Server<br/>Port 5000"]
-        Auth["JWT Authentication &<br/>Bcrypt Password Security"]
-        Routes["Routes: Auth, Student,<br/>Faculty & Admin Operations"]
-        Metrics["Prometheus Exporter<br/>/metrics Endpoint"]
-    end
-
-    subgraph CloudServices["☁️ Cloud & Database Tier"]
-        Mongo["🍃 MongoDB Atlas Cloud Database<br/>Managed Multi-Region Replica Set"]
-        Resend["📧 Resend Email Microservice<br/>6-Digit Transactional OTP Delivery"]
-        S3["📦 AWS S3 + CloudFront CDN<br/>High-Speed Video & PDF Streaming"]
-    end
-
-    subgraph MonitoringTier["📊 Observability Tier"]
-        Prom["📈 Prometheus Scraper<br/>Gathers Latency & Request Rates"]
-        Graf["📉 Grafana Dashboards<br/>Real-Time Health & Traffic Visualizer"]
-    end
-
-    Clients -->|HTTPS Traffic| SPA
-    SPA --> Proxy
-    Proxy -->|API Calls| API
-    API --> Auth
-    API --> Routes
-    Routes <-->|Queries & Writes| Mongo
-    Routes -->|Send OTPs| Resend
-    Routes -->|Upload Notes / Videos| S3
-    S3 -.->|Stream Media| Clients
-    API -.-> Metrics
-    Metrics -.-> Prom
-    Prom --> Graf
+    Users -->|HTTPS| Frontend
+    Frontend <-->|REST API Calls| Backend
+    Backend <-->|Read / Write| Database
+    Backend -->|Send OTPs| Email
+    Backend -.->|Scrape /metrics| Monitoring
 ```
 
 ---
