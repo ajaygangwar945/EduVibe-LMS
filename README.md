@@ -22,7 +22,7 @@
 
 ## 📖 About The Project
 
-Welcome to EduVibe — Next-Gen Learning Management & Academic Portal! This platform is designed to make academic management effortless for students, faculty, and administrators by uniting course notes, video lectures, attendance tracking, and quizzes into one simple, modern web application.
+Welcome to EduVibe - Next-Gen Learning Management & Academic Portal! This platform is designed to make academic management effortless for students, faculty, and administrators by uniting course notes, video lectures, attendance tracking, and quizzes into one simple, modern web application.
 
 ### ✨ Key Features
 
@@ -42,10 +42,6 @@ Welcome to EduVibe — Next-Gen Learning Management & Academic Portal! This plat
 The project is fully deployed and accessible online.  
 
 [![Live](https://img.shields.io/badge/Live-Visit%20Site-brightgreen?style=for-the-badge)](https://edu-vibe-lms.vercel.app/)
-
-- ⚡ **Live Production API:** [https://eduvibe-lms-backend-api.onrender.com/api/health](https://eduvibe-lms-backend-api.onrender.com/api/health)
-- 📊 **Live Telemetry & Metrics:** [https://eduvibe-lms-backend-api.onrender.com/metrics](https://eduvibe-lms-backend-api.onrender.com/metrics)
-- 📖 **Full Engineering Manual:** [`documentation.txt`](https://github.com/ajaygangwar945/EduVibe-LMS/blob/main/documentation.txt)
 
 ---
 
