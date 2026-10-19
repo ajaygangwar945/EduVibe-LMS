@@ -49,23 +49,38 @@ The project is fully deployed and accessible online.
 
 EduVibe is designed with a modern, decoupled cloud architecture that keeps the frontend fast, the backend scalable, and operations fully automated.
 
-```mermaid
-flowchart TD
-    Users["👥 End Users<br/>(Students, Faculty, Admin)"]
-    Frontend["⚡ Frontend Tier<br/>(React 18 + Vite SPA)"]
-    Backend["⚙️ Backend API Tier<br/>(Node.js & Express REST API)"]
-
-    subgraph CloudServices["☁️ Cloud Services & Observability"]
-        Database[("🍃 MongoDB Atlas<br/>Cloud Database")]
-        Email["📧 Resend Email API<br/>OTP Authentication"]
-        Monitoring["📊 Prometheus & Grafana<br/>Metrics & Dashboards"]
-    end
-
-    Users -->|HTTPS| Frontend
-    Frontend <-->|REST API Calls| Backend
-    Backend <-->|Read / Write| Database
-    Backend -->|Send OTPs| Email
-    Backend -.->|Scrape /metrics| Monitoring
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        EDUVIBE SYSTEM ARCHITECTURE                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   [ CLIENTS / END USERS ]                                                   │
+│   • Students            • Academic Faculty       • Master Administrator     │
+│         │                         │                        │                │
+│         └─────────────────────────┼────────────────────────┘                │
+│                                   │ HTTPS / TLS (Port 443)                  │
+│                                   ▼                                         │
+│   [ FRONTEND TIER: Vercel Global Edge CDN ]                                 │
+│   • React 18 SPA (Vite Engine) • Glassmorphism UI (Dark & Light Themes)     │
+│   • Edge Reverse Proxy: /api/* -> Backend API Service                       │
+│   • Session Management via React Context API & JWT Bearer Storage           │
+│         │                                                                   │
+│         │ REST API Calls (JSON & Bearer JWT)                                │
+│         ▼                                                                   │
+│   [ BACKEND API TIER: Node.js & Express Server (Port 5000) ]                │
+│   • JWT Authentication & Bcrypt Password Security                           │
+│   • Modular Controllers: /auth, /student, /faculty, /admin                  │
+│   • File Storage Handler: Multer Middleware (Course Notes & Video Uploads)  │
+│   • Telemetry Exporter: Prometheus /metrics Endpoint                        │
+│         │                                                                   │
+│         ├─────────────────────────┬────────────────────────┐                │
+│         │ Mongoose ODM (CRUD)     │ HTTPS API Calls (OTPs) │ Scrape /metrics│
+│         ▼                         ▼                        ▼                │
+│   [ DATABASE TIER ]        [ EMAIL SERVICE ]      [ OBSERVABILITY ]         │
+│   MongoDB Atlas Cloud      Resend Cloud API       Prometheus & Grafana      │
+│   Multi-Region Cluster     6-Digit Auth OTPs      Metrics & Live Dashboards │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
