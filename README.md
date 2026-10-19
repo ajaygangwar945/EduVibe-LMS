@@ -24,7 +24,7 @@
 
 Welcome to EduVibe — Next-Gen Learning Management & Academic Portal! This platform is designed to make academic management effortless for students, faculty, and administrators by uniting course notes, video lectures, attendance tracking, and quizzes into one simple, modern web application.
 
-## ✨ Key Features
+### ✨ Key Features
 
 - 📚 **Courses & Study Materials** - Browse syllabus, download PDF notes, and stream video lectures
 - ⏱️ **Timed Quizzes** - Interactive multiple-choice tests with countdown timers and instant scores
