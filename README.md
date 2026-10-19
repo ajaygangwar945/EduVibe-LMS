@@ -131,6 +131,8 @@ You can run EduVibe in whichever way fits your setup:
 
 ### 💻 Method 1: Local Development (Fastest for Coding)
 
+---
+
 Best if you want to make changes to the code with instant browser refresh.
 
 #### 1. Setup Environment Files
@@ -200,6 +202,8 @@ docker compose --profile monitoring down
 
 ### ☁️ Method 3: Cloud Deployment (AWS + Vercel + Terraform)
 
+---
+
 Best for deploying your own cloud infrastructure on AWS.
 
 ```bash
@@ -220,6 +224,8 @@ git push origin main
 ---
 
 ### 🌐 Method 4: Production Cloud Tier (Vercel + Render + MongoDB Atlas)
+
+---
 
 Live, permanent production deployment requiring **$0.00 cost** and zero virtual machines to manage:
 
