@@ -169,6 +169,40 @@ npm run dev
 
 *Open `http://localhost:5173` in your browser.*
 
+#### 📍 Localhost Endpoints & Service URLs
+
+- 💻 **Frontend Web App:** [http://localhost:5173](http://localhost:5173) (Vite Dev Server with instant hot reload)
+- ⚙️ **Backend REST API:** [http://localhost:5000](http://localhost:5000) (Health check: [http://localhost:5000/api/health](http://localhost:5000/api/health))
+- 📊 **Prometheus Exporter:** [http://localhost:5000/metrics](http://localhost:5000/metrics) (Live server metrics)
+- 🍃 **Database:** MongoDB Atlas Cloud Cluster (Configured via `MONGO_URI` in `.env`)
+- 📈 **Prometheus Server:** [http://localhost:9090](http://localhost:9090) (Local metrics collector)
+- 📉 **Grafana Dashboard:** [http://localhost:3001](http://localhost:3001) (Real-time observability dashboard)
+
+#### 🗺️ Local Development Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       LOCAL DEVELOPMENT ARCHITECTURE                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   🌐 User Browser                                                           │
+│         │                                                                   │
+│         │ HTTP (Port 5173)                                                  │
+│         ▼                                                                   │
+│   [💻 React 18 Frontend] ──── (Vite Dev Server)                             │
+│         │                                                                   │
+│         │ API Requests (Port 5000)                                          │
+│         ▼                                                                   │
+│   [⚙️ Express Backend API] ──────► [🍃 MongoDB Atlas Cloud Database]         │
+│         │                  ──────► [📧 Resend Cloud (6-Digit OTPs)]         │
+│         │                                                                   │
+│         │ Scrapes Telemetry (/metrics)                                      │
+│         ▼                                                                   │
+│   [📊 Prometheus (Port 9090)] ───► [📈 Grafana Dashboards (Port 3001)]      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
 ---
 
 ### 🐳 Method 2: Docker Compose (All-in-One Container Stack)
