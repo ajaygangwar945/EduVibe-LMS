@@ -476,12 +476,58 @@ curl http://localhost:5000/api/health
 
 ---
 
-Live, permanent production deployment requiring **$0.00 cost** and zero virtual machines to manage:
+Always-available, 24/7 permanent production deployment requiring **$0.00 infrastructure cost** and zero virtual machines to manage. The React 18 single-page application is served globally across Vercel's Edge Network with edge proxying and SSL, while the containerized Node.js REST API runs on Render's Docker Web Service, connecting to an encrypted MongoDB Atlas Cloud database and delivering transactional emails via Resend.
 
-- **Web Frontend:** [https://edu-vibe-lms.vercel.app/](https://edu-vibe-lms.vercel.app/) (Served across Vercel Global Edge)
-- **Backend API:** [https://eduvibe-lms-backend-api.onrender.com/api/health](https://eduvibe-lms-backend-api.onrender.com/api/health) (Render Docker Service)
-- **Database:** MongoDB Atlas M0 Cloud Replica Set (AWS Singapore)
-- **Emails:** Resend Cloud API for real-time 6-digit OTP delivery
+#### 📍 Production Cloud Service Ports & Endpoints
+
+- 🌐 **Web Frontend (Vercel Global Edge):** [https://edu-vibe-lms.vercel.app/](https://edu-vibe-lms.vercel.app/) (Served over HTTP/2 with TLS 1.3)
+- ⚡ **Backend API Server (Render):** [https://eduvibe-lms-backend-api.onrender.com](https://eduvibe-lms-backend-api.onrender.com) (Containerized Express Engine)
+- 🔌 **API Health Check:** [https://eduvibe-lms-backend-api.onrender.com/api/health](https://eduvibe-lms-backend-api.onrender.com/api/health)
+- 📊 **Prometheus Exporter:** [https://eduvibe-lms-backend-api.onrender.com/metrics](https://eduvibe-lms-backend-api.onrender.com/metrics) (Live production telemetry)
+- 🍃 **Database:** MongoDB Atlas M0 Cloud Replica Set (`AWS ap-southeast-1` Singapore)
+- 📧 **Transactional Emails:** Resend Cloud API for real-time 6-digit OTP delivery
+- 📖 **Full Engineering Manual:** [`documentation.txt`](https://github.com/ajaygangwar945/EduVibe-LMS/blob/main/documentation.txt)
+
+#### 🗺️ Production Cloud Tier Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                  PRODUCTION CLOUD TIER ARCHITECTURE (24/7)                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   User Browser (Global Clients)                                             │
+│         │                                                                   │
+│         │ HTTPS (HTTP/2, TLS 1.3)                                           │
+│         ▼                                                                   │
+│   [Vercel Global Edge CDN] ──── (https://edu-vibe-lms.vercel.app)           │
+│         │                                                                   │
+│         │ Edge Reverse Proxy (/api/* ──► Render Web Service)                │
+│         ▼                                                                   │
+│   [Render Docker Service] ───── (eduvibe-lms-backend-api.onrender.com)      │
+│         ├───► [MongoDB Atlas M0 Cloud] (Managed Replica Set in Singapore)   │
+│         ├───► [Resend Email Microservice] (Real-Time 6-Digit OTP Delivery)  │
+│         └───► [Prometheus Exporter] (/metrics Live Telemetry Endpoint)      │
+│                                                                             │
+│   Automated Git Push Deployments (GitHub ──► Render & Vercel)               │
+│         │                                                                   │
+│         │ Automatic Webhook Container Builds & Zero-Downtime Rollouts       │
+│         ▼                                                                   │
+│   [Production Cloud Tier] ───── ($0.00 Infrastructure Cost & 24/7 Uptime)     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 🧪 Live Automated Health Verification
+
+You can verify the production services directly from your terminal:
+
+```bash
+# 1. Verify live backend health status (HTTP 200 OK from Render):
+curl https://eduvibe-lms-backend-api.onrender.com/api/health
+
+# 2. Inspect real-time Prometheus telemetry metrics:
+curl https://eduvibe-lms-backend-api.onrender.com/metrics
+```
 
 ---
 
