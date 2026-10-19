@@ -209,26 +209,65 @@ npm run dev
 
 ---
 
-Best if you have Docker Desktop installed and want to run everything with a single command.
+Best if you have Docker Desktop installed and want to run the entire multi-container environment with a single command.
 
+#### 1. Choose Your Run Mode
+
+##### Option A: Core Application Stack (Frontend + Backend)
+Starts the React Nginx web client and Express REST API:
 ```bash
-# Start Frontend, Backend, and MongoDB GUI:
 docker compose up -d
+```
 
-# OR Start with Prometheus & Grafana monitoring included:
+##### Option B: Full Observability Stack (Core + Prometheus + Grafana)
+Starts the entire system including real-time monitoring and dashboards:
+```bash
 docker compose --profile monitoring up -d
 ```
 
-**Local Docker Service Ports:**
+#### 📍 Local Docker Service Ports & Endpoints
 
-- 🎓 **Web Portal:** [http://localhost:3005](http://localhost:3005)
-- ⚡ **Backend API:** [http://localhost:5000/api/health](http://localhost:5000/api/health)
-- 🍃 **Mongo Express Database Viewer:** [http://localhost:8081](http://localhost:8081)
-- 📊 **Prometheus Metrics:** [http://localhost:9090](http://localhost:9090)
-- 📈 **Grafana Dashboards:** [http://localhost:3001](http://localhost:3001)
+- 🎓 **Web Portal (Frontend):** [http://localhost:3005](http://localhost:3005) (Nginx reverse proxy container)
+- ⚡ **Backend API Server:** [http://localhost:5000](http://localhost:5000) (Health check: [http://localhost:5000/api/health](http://localhost:5000/api/health))
+- 📊 **Prometheus Exporter:** [http://localhost:5000/metrics](http://localhost:5000/metrics) (Live container telemetry)
+- 🍃 **Database:** MongoDB Atlas Cloud Cluster (Configured via `MONGO_URI` in `.env`)
+- 📈 **Prometheus Server:** [http://localhost:9090](http://localhost:9090) (Scrapes `/metrics` across `eduvibe-network`)
+- 📉 **Grafana Dashboards:** [http://localhost:3001](http://localhost:3001) (Pre-configured real-time metrics visualizer)
 
+#### 🗺️ Docker Compose Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       DOCKER COMPOSE ARCHITECTURE                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   User Browser                                                              │
+│         │                                                                   │
+│         │ HTTP (Port 3005)                                                  │
+│         ▼                                                                   │
+│   [Docker: eduvibe-frontend] ──── (Nginx Container on Port 3005)            │
+│         │                                                                   │
+│         │ Internal Bridge Network (eduvibe-network)                         │
+│         ▼                                                                   │
+│   [Docker: eduvibe-backend] (Port 5000)                                     │
+│         ├───► [MongoDB Atlas Cloud Database]                                │
+│         ├───► [Resend Cloud (6-Digit OTP Delivery)]                         │
+│         │                                                                   │
+│         │ Telemetry (/metrics)                                              │
+│         ▼                                                                   │
+│   [Docker: eduvibe-prometheus] (Port 9090)                                  │
+│         │                                                                   │
+│         │ Visualizes Metrics                                                │
+│         ▼                                                                   │
+│   [Docker: eduvibe-grafana] (Port 3001)                                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 2. Stop Containers Safely
+
+To shut down all running containers and free system memory (preserves persistent volumes):
 ```bash
-# To stop containers safely (preserves your database data):
 docker compose --profile monitoring down
 ```
 
