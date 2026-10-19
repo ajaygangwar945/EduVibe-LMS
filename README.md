@@ -375,22 +375,100 @@ minikube delete
 
 ---
 
-Best for deploying your own cloud infrastructure on AWS.
+Best for deploying a production-ready Decoupled Hybrid Cloud Architecture adhering 100% to the AWS Free Tier ($0.00 billable cost). The React web client is deployed on Vercel's Global Edge Network, while backend API, Prometheus, and Grafana containers run on an AWS EC2 instance (`t2.micro`, Ubuntu 22.04 LTS) in Mumbai (`ap-south-1`).
+
+#### 1. Provision AWS Infrastructure with Terraform (Under 45 Seconds)
 
 ```bash
-# 1. Provision AWS EC2 & Security Groups in under 45 seconds:
 cd devops/terraform
 terraform init
 terraform apply -auto-approve
+```
 
-# 2. View your live URLs:
+To display your live deployed endpoints:
+```bash
 terraform output
+```
 
-# 3. Deploy changes anytime by pushing to GitHub:
+#### 2. Automated Continuous Deployment (GitHub Actions)
+
+Every push to the `main` branch automatically triggers the CI/CD pipeline ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)):
+1. Runs full syntax and quality validation on all JavaScript files.
+2. Builds and validates Docker container images.
+3. Dynamically queries AWS EC2 state and public IP via instance ID (`i-06a67a3041f734369`).
+4. Connects via SSH to pull the latest code, rebuild containers, and prune unused images with zero downtime.
+
+```bash
 git push origin main
 ```
 
-*(To tear down all AWS resources and avoid any charges, run `terraform destroy -auto-approve`).*
+#### 3. Manual SSH Terminal Access (Optional)
+
+You can SSH directly into the AWS EC2 instance to inspect live Docker containers:
+```bash
+ssh -i ~/.ssh/webserver.pem ubuntu@<YOUR_AWS_EC2_IP>
+docker ps
+curl http://localhost:5000/api/health
+```
+
+#### 📍 Live Cloud Service Ports & Endpoints
+
+- 🌐 **Web Frontend (Vercel Global Edge):** [https://edu-vibe-lms.vercel.app/](https://edu-vibe-lms.vercel.app/)
+- ⚡ **Backend API Server (AWS EC2):** `http://<YOUR_AWS_EC2_IP>:5000` (Health check: `http://<YOUR_AWS_EC2_IP>:5000/api/health`)
+  *(Verified EC2 IP: [`http://16.4.32.15:5000/api/health`](http://16.4.32.15:5000/api/health))*
+- 📊 **Prometheus Exporter:** `http://<YOUR_AWS_EC2_IP>:5000/metrics` (Live EC2 container metrics)
+- 🍃 **Database:** MongoDB Atlas M0 Cloud Replica Set (Encrypted TLS connection)
+- 📈 **Prometheus Server:** `http://<YOUR_AWS_EC2_IP>:9090` (Scrapes `/metrics` across AWS instance)
+- 📉 **Grafana Dashboards:** `http://<YOUR_AWS_EC2_IP>:3001` (Live production telemetry visualizer)
+
+#### 🗺️ AWS Hybrid Cloud Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                   AWS HYBRID CLOUD DEPLOYMENT ARCHITECTURE                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   User Browser                                                              │
+│         │                                                                   │
+│         │ HTTPS (Global Edge Network)                                       │
+│         ▼                                                                   │
+│   [Vercel Global Edge] ────── (React 18 SPA at edu-vibe-lms.vercel.app)     │
+│         │                                                                   │
+│         │ Edge Reverse Proxy (/api/* ──► AWS EC2)                           │
+│         ▼                                                                   │
+│   [AWS EC2 t2.micro Node] ─── (Ubuntu 22.04 LTS in Mumbai ap-south-1)       │
+│         ├───► [Docker: backend-api] (Port 5000 /api/health)                 │
+│         │         ├───► [MongoDB Atlas Managed Cloud Database]              │
+│         │         └───► [Resend API (Transactional OTP Emails)]             │
+│         │                                                                   │
+│         ├───► [Docker: frontend] (Nginx Container on Port 3005)             │
+│         ├───► [Docker: prometheus] (Metrics Scraper on Port 9090)           │
+│         └───► [Docker: grafana] (Telemetry Dashboard on Port 3001)          │
+│                                                                             │
+│   Continuous Deployment (GitHub Actions Runner)                             │
+│         │                                                                   │
+│         │ Dynamic IP Discovery & Automated SSH Deploy                       │
+│         ▼                                                                   │
+│   [Live EC2 Instance] ─────── (Zero-Downtime Container Rebuild)             │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 4. Cost Protection ($0.00 Free Tier) & Teardown
+
+- **Pause EC2 Instance** (Stops hourly compute while preserving the 20GB root volume):
+  ```bash
+  aws ec2 stop-instances --instance-ids i-06a67a3041f734369
+  ```
+- **Resume EC2 Instance** (GitHub Actions auto-discovers the new IP upon push):
+  ```bash
+  aws ec2 start-instances --instance-ids i-06a67a3041f734369
+  ```
+- **Complete Cloud Teardown** (Terminates all AWS infrastructure in under 45 seconds):
+  ```bash
+  cd devops/terraform
+  terraform destroy -auto-approve
+  ```
 
 ---
 
