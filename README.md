@@ -20,26 +20,22 @@
 
 ---
 
-## 💡 About The Project (What is EduVibe?)
+## 📖 About The Project
 
-**EduVibe** is an all-in-one, modern Learning Management System (LMS) and Academic Portal designed to make institutional operations effortless for students, teachers, and administrators. 
-
-Instead of juggling different tools for attendance, course notes, video lectures, and quizzes, EduVibe brings everything into one unified, responsive platform with a modern glassmorphic interface and real-time cloud automation.
+Welcome to EduVibe — Next-Gen Learning Management & Academic Portal! This platform is designed to make academic management effortless for students, faculty, and administrators by uniting course notes, video lectures, attendance tracking, and quizzes into one simple, modern web application.
 
 ---
 
 ## ✨ Key Features
 
-Here is what makes EduVibe powerful, simple, and reliable:
-
-- 🔐 **Simple & Secure Authentication:** Fast email verification with 6-digit OTP codes (powered by Resend) and industry-standard Bcrypt password encryption.
-- 📚 **Courses & Study Materials:** Teachers can publish courses, upload lecture notes (PDFs), and post recorded video lectures that students can stream right inside their browser.
-- ⏱️ **Interactive Quizzes with Instant Grading:** Students take timed multiple-choice quizzes with live countdown timers and receive automatic score feedback immediately upon submission.
-- 📅 **Smart Attendance Tracking:** Faculty mark daily attendance in seconds; students get real-time percentage calculations and visual alerts if attendance falls below 75%.
-- 📝 **Digital Assignment Submissions:** Students submit homework online, and faculty can review, grade, and provide remarks in real time.
-- 🎨 **Modern Glassmorphic UI:** Clean, intuitive interface with smooth animations, responsive layouts for mobile and desktop, and toggleable Dark & Light themes.
-- ☁️ **Production Cloud & DevOps:** Deployed with high availability across AWS (EC2, S3, CloudFront), Vercel Global Edge, and Render with automated CI/CD via GitHub Actions.
-- 📊 **Real-Time Monitoring:** Live Prometheus `/metrics` telemetry and Grafana dashboards for monitoring latency, request volume, and server health.
+- 📚 **Courses & Study Materials** - Browse syllabus, download PDF notes, and stream video lectures
+- ⏱️ **Timed Quizzes** - Interactive multiple-choice tests with countdown timers and instant scores
+- 📅 **Attendance Tracking** - Daily attendance logging with a 75% minimum warning alert
+- 📝 **Assignment Portal** - Easy online homework submission with faculty review and grading
+- 🔐 **Secure Verification** - Fast 6-digit email OTP verification and encrypted user accounts
+- 🛡️ **Role Dashboards** - Dedicated workspaces tailored for Students, Faculty, and Admin
+- 🎨 **Modern Glassmorphic UI** - Clean aesthetic with smooth animations and Dark & Light themes
+- 📱 **Fully Responsive** - Works smoothly on mobile phones, tablets, and desktop devices
 
 ---
 
