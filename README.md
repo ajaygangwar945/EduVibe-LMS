@@ -347,17 +347,17 @@ Invoke-RestMethod -Uri "https://eduvibe-lms-backend-api.onrender.com/api/auth/se
 
 ---
 
-## 🔑 Default Demo Accounts
+## 🔑 System Roles & Access Control
 
-The database comes pre-seeded with standardized role-based credentials:
+The database is initialized with role-based access control and configurable environment credentials:
 
 | Role | Email / Identifier | Password | Access Capabilities |
 | :--- | :--- | :--- | :--- |
-| **Master Administrator** | `ajay.12322931@lpu.in` | `123456` | Single Master Admin Policy. Approve faculty, manage users, review system KPIs |
-| **Academic Faculty** | *(Registered Faculty Email)* | *(Faculty Password)* | Create courses, mark attendance, upload videos/notes, create quizzes (OTP verified) |
-| **Student** | *(Self-Registered Email)* | *(Student Password)* | Watch lectures, download notes, submit assignments, take quizzes (OTP verified) |
-| **Mongo Express GUI** | `http://<YOUR_AWS_PUBLIC_IP>:8081` | `admin` / `EduVibeSecure2026!` | Web-based database collection viewer *(local profile)* |
-| **Grafana Analytics** | `http://<YOUR_AWS_PUBLIC_IP>:3001` | `admin` / `EduVibeGrafana2026!` | Real-time Prometheus telemetry dashboards *(monitoring profile)* |
+| **Master Administrator** | `admin@eduvibe.com` *(or configured in `.env`)* | *Configured in `.env`* | Single Master Admin Policy. Approve faculty, manage users, review system KPIs |
+| **Academic Faculty** | *(Registered Faculty Email)* | *User-defined password* | Create courses, mark attendance, upload videos/notes, create quizzes (OTP verified) |
+| **Student** | *(Self-Registered Email)* | *User-defined password* | Watch lectures, download notes, submit assignments, take quizzes (OTP verified) |
+| **Mongo Express GUI** | `http://<YOUR_AWS_PUBLIC_IP>:8081` | `admin` / *Configured in `.env`* | Web-based database collection viewer *(local profile)* |
+| **Grafana Analytics** | `http://<YOUR_AWS_PUBLIC_IP>:3001` | `admin` / *Configured in `.env`* | Real-time Prometheus telemetry dashboards *(monitoring profile)* |
 
 ---
 
@@ -440,4 +440,4 @@ EduVibe/
 
 - **Ajay Gangwar** - [GitHub Profile](https://github.com/ajaygangwar945)
 - **Project**: EduVibe - Next-Gen Academic & Learning Management Portal
-- **Course**: INT 377 - Cloud & DevOps Architecture (SEM 6)
+- **Specialization**: Cloud & DevOps Architecture Engineering

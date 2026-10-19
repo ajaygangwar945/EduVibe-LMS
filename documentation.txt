@@ -30,7 +30,7 @@ TABLE OF CONTENTS:
    5.4. Method 4: Production Cloud Tier (Vercel + Render + MongoDB Atlas)
 6. COMPLETE REST API ENDPOINTS REFERENCE
 7. DATABASE SCHEMA & DATA MODELS
-8. DEFAULT DEMO CREDENTIALS & ACCESS
+8. SYSTEM ROLES & ACCESS CONTROL
 9. SECURITY & DEVSECOPS PRACTICES
 10. TROUBLESHOOTING & MAINTENANCE CHEAT SHEET
 ================================================================================
@@ -468,7 +468,7 @@ PORT=5000
 MONGO_URI=mongodb://127.0.0.1:27017/eduvibe
 JWT_SECRET=your_secret_key_here
 ADMIN_EMAIL=admin@eduvibe.com
-ADMIN_PASSWORD=admin123
+ADMIN_PASSWORD=your_secure_admin_password
 CLIENT_URL=http://localhost:5173
 ```
 
@@ -694,31 +694,32 @@ System & Observability:
 
 
 ================================================================================
-8. DEFAULT DEMO CREDENTIALS & ACCESS
+8. SYSTEM ROLES & ACCESS CONTROL
 ================================================================================
 Role: Master Administrator
-- Email: `ajay.12322931@lpu.in`
-- Password: `123456`
+- Email: Configured via ADMIN_EMAIL in environment (.env)
+- Password: Configured via ADMIN_PASSWORD in environment (.env)
 - Scope: Single Master Admin Policy. Approve faculty accounts, manage all users, review system KPIs.
 
-Role: Sample Faculty
-- Email: Registered faculty email
-- Password: Faculty account password
+Role: Academic Faculty
+- Email: Verified institutional faculty email
+- Password: User-defined secure password created during registration
 - Scope: Create courses, mark attendance, upload videos/notes, create quizzes (Requires 6-Digit Email OTP).
 
 Role: Student
 - Self-registration on login page.
+- Password: User-defined secure password created during registration
 - Auto-generates official roll number: `STU-2026-XXXX` upon 6-Digit Email OTP verification.
 
 Database GUI (Mongo Express):
 - URL: `http://localhost:8081` (Local Docker Profile)
-- Username: `admin`
-- Password: `EduVibeSecure2026!` (Configured in `.env`)
+- Username: Configured via MONGO_EXPRESS_USER in environment (.env)
+- Password: Configured via MONGO_EXPRESS_PASSWORD in environment (.env)
 
 Analytics Dashboard (Grafana):
 - URL: `http://localhost:3000` (Local) / `http://localhost:3001` (Docker)
-- Username: `admin`
-- Password: `123456` (Local) / `EduVibeGrafana2026!` (Docker)
+- Username: Configured via GRAFANA_ADMIN_USER in environment (.env)
+- Password: Configured via GRAFANA_ADMIN_PASSWORD in environment (.env)
 
 
 ================================================================================
