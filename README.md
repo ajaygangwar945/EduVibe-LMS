@@ -185,20 +185,20 @@ npm run dev
 │                       LOCAL DEVELOPMENT ARCHITECTURE                        │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│   🌐 User Browser                                                           │
+│   User Browser                                                              │
 │         │                                                                   │
 │         │ HTTP (Port 5173)                                                  │
 │         ▼                                                                   │
-│   [💻 React 18 Frontend] ──── (Vite Dev Server)                             │
+│   [React 18 Frontend] ──── (Vite Dev Server)                                │
 │         │                                                                   │
 │         │ API Requests (Port 5000)                                          │
 │         ▼                                                                   │
-│   [⚙️ Express Backend API] ──────► [🍃 MongoDB Atlas Cloud Database]         │
-│         │                  ──────► [📧 Resend Cloud (6-Digit OTPs)]         │
+│   [Express Backend API] ──────► [MongoDB Atlas Cloud Database]              │
+│         │               ──────► [Resend Cloud (6-Digit OTPs)]               │
 │         │                                                                   │
 │         │ Scrapes Telemetry (/metrics)                                      │
 │         ▼                                                                   │
-│   [📊 Prometheus (Port 9090)] ───► [📈 Grafana Dashboards (Port 3001)]      │
+│   [Prometheus (Port 9090)] ───► [Grafana Dashboards (Port 3001)]            │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
