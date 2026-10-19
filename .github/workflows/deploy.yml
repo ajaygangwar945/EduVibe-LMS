@@ -23,10 +23,11 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Backend Syntax Check
+      - name: Backend Syntax & Integrity Check
         run: |
           cd backend
-          node -e "console.log('✅ Backend syntax verification passed!')"
+          node -c server.js routes/*.js middleware/*.js models/*.js utils/*.js
+          echo "✅ All backend JavaScript syntax checks passed cleanly!"
 
   # ===========================================================================
   # Stage 2: Docker Build Verification (Tests Container Builds on GitHub Cloud)

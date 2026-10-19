@@ -85,7 +85,7 @@ router.post('/send-otp', rateLimitAuth, async (req, res) => {
     res.json({
       success: true,
       message: `A 6-digit verification code has been sent to ${cleanEmail}. Valid for 5 minutes.`,
-      devOtp: emailResult.delivered ? undefined : emailResult.devOtp,
+      devOtp: process.env.NODE_ENV === 'production' ? undefined : (emailResult.delivered ? undefined : emailResult.devOtp),
     });
   } catch (error) {
     console.error('Error in send-otp:', error);

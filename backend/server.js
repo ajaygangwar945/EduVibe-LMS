@@ -156,7 +156,8 @@ async function seedDefaultAdmin() {
 mongoose
   .connect(MONGO_URI)
   .then(async () => {
-    console.log(`[Database] MongoDB connected successfully to ${MONGO_URI}`);
+    const sanitizedUri = MONGO_URI.replace(/\/\/([^:]+):([^@]+)@/, '//$1:****@');
+    console.log(`[Database] MongoDB connected successfully to ${sanitizedUri}`);
     await seedDefaultAdmin();
   })
   .catch((err) => {

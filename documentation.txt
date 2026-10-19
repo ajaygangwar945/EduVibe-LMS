@@ -696,42 +696,74 @@ System & Observability:
 ================================================================================
 8. DEFAULT DEMO CREDENTIALS & ACCESS
 ================================================================================
-Role: System Admin
-- Email: `admin@eduvibe.com`
-- Password: `admin123`
-- Scope: Approve faculty accounts, manage all users, review system KPIs.
+Role: Master Administrator
+- Email: `ajay.12322931@lpu.in`
+- Password: `123456`
+- Scope: Single Master Admin Policy. Approve faculty accounts, manage all users, review system KPIs.
 
 Role: Sample Faculty
-- Email: `robert.smith@eduvibe.com`
-- Password: `password123`
-- Scope: Create courses, mark attendance, upload videos/notes, create quizzes.
+- Email: Registered faculty email
+- Password: Faculty account password
+- Scope: Create courses, mark attendance, upload videos/notes, create quizzes (Requires 6-Digit Email OTP).
 
 Role: Student
 - Self-registration on login page.
-- Auto-generates roll number: `STU-2026-XXXX`.
+- Auto-generates official roll number: `STU-2026-XXXX` upon 6-Digit Email OTP verification.
 
 Database GUI (Mongo Express):
-- URL: `http://<YOUR_AWS_ELASTIC_IP>:8081`
+- URL: `http://localhost:8081` (Local Docker Profile)
 - Username: `admin`
-- Password: (Configured in `.env`)
+- Password: `EduVibeSecure2026!` (Configured in `.env`)
 
 Analytics Dashboard (Grafana):
-- URL: `http://<YOUR_AWS_ELASTIC_IP>:3001`
+- URL: `http://localhost:3000` (Local) / `http://localhost:3001` (Docker)
 - Username: `admin`
-- Password: (Configured in `.env`)
+- Password: `123456` (Local) / `EduVibeGrafana2026!` (Docker)
 
 
 ================================================================================
 9. SECURITY & DEVSECOPS PRACTICES
 ================================================================================
-- NoSQL Injection Prevention: Strict type coercion on all user input.
-- Brute-Force Rate Limiting: Rate limiters on `/api/auth` endpoints.
-- IDOR Protection: Object-level authorization checks on all modifying actions.
-- File Upload Whitelisting: Strict MIME-type checking (.pdf, .mp4, .webm).
-- Container Security: Node.js container runs as unprivileged user `node`.
-- Secret Hygiene: `.dockerignore` and `.gitignore` prevent sensitive file leaks.
-- Cloud Encryption: Amazon S3 AES-256 server-side encryption and EBS gp3 encryption.
-- Network Isolation: MongoDB port 27017 is bound to internal container network.
+EduVibe integrates enterprise DevSecOps principles across the entire application
+and cloud lifecycle:
+
+1. Application Layer Security:
+   - NoSQL Injection Prevention: Strict type verification (`typeof string`) across
+     all authentication and data query endpoints to prevent MongoDB operator attacks ($gt, $ne).
+   - Password Hashing: Bcrypt with 10 salt rounds executed inside Mongoose `pre('save')`
+     hooks. Raw passwords are never stored in the database.
+   - Password Masking: User models enforce `select('-password')` by default to prevent
+     hash leakage in API responses.
+   - Application Log Sanitization: Database connection strings (`MONGO_URI`) are
+     automatically sanitized before logging to stdout, masking passwords (`user:****@host`).
+   - Production OTP Leak Protection: In production mode (`NODE_ENV=production`), `devOtp`
+     is suppressed from HTTP responses. Verification codes are delivered strictly via Resend API.
+   - Anti-Brute-Force Rate Limiting: In-memory sliding window rate limiter protects
+     `/api/auth` routes (maximum 20 attempts per 15-minute window per IP).
+   - IDOR Protection: Inverted object-level authorization checks verify course and
+     submission ownership before allowing updates or file deletions.
+
+2. Container & Image Security:
+   - Unprivileged Execution: The Node.js production Dockerfile executes under `USER node`,
+     preventing container breakout risks associated with running as `root`.
+   - Security Headers: Reverse proxies enforce `X-Content-Type-Options: nosniff`,
+     `X-Frame-Options: SAMEORIGIN`, and strict Referrer-Policy.
+   - Nginx Version Masking: `server_tokens off` hides Nginx version banners from scanners.
+   - Multi-Stage Builds: Frontend Dockerfile compiles Vite assets in a builder stage
+     and discards build tools, leaving only minimal Nginx Alpine binaries in production.
+
+3. Cloud & Infrastructure Security:
+   - Least-Privilege IAM: EC2 instances attach `AmazonSSMManagedInstanceCore` for secure
+     Systems Manager access without requiring permanent open SSH access.
+   - Ingress Firewall Filtering: Port 22 (SSH), Port 9090 (Prometheus), and Port 3001
+     (Grafana) are restricted to authorized administrator CIDR blocks.
+   - At-Rest Cloud Encryption: AWS EC2 root volumes use 20 GB gp3 storage encrypted
+     with AWS KMS encryption at rest.
+   - In-Transit Cloud Encryption: All communication with MongoDB Atlas and Vercel Global
+     Edge CDN is encrypted via TLS 1.3 / HTTPS.
+   - Secret Hygiene: Zero plaintext secrets exist in Git repositories. Sanitized
+     `.env.example` templates are provided, and secrets are injected via GitHub Actions
+     encrypted secrets and Kubernetes `secretKeyRef`.
 
 
 ================================================================================

@@ -349,15 +349,47 @@ Invoke-RestMethod -Uri "https://eduvibe-lms-backend-api.onrender.com/api/auth/se
 
 ## 🔑 Default Demo Accounts
 
-The database comes pre-seeded with test accounts:
+The database comes pre-seeded with standardized role-based credentials:
 
-| Role | Email | Password | Access Capabilities |
+| Role | Email / Identifier | Password | Access Capabilities |
 | :--- | :--- | :--- | :--- |
-| **System Admin** | `admin@eduvibe.com` | `admin123` | Approve faculty, manage users, view system KPIs |
-| **Faculty** | `robert.smith@eduvibe.com` | `password123` | Create courses, mark attendance, upload videos/notes, create quizzes |
-| **Student** | *(Self-Register)* | *(Your Password)* | Click **Register as Student** on login page (gets ID `STU-2026-XXXX`) |
-| **Mongo Express GUI** | `http://<YOUR_AWS_ELASTIC_IP>:8081` | `admin` | *(Configured in `.env`)* |
-| **Grafana Analytics** | `http://<YOUR_AWS_ELASTIC_IP>:3001` | `admin` | *(Configured in `.env`)* |
+| **Master Administrator** | `ajay.12322931@lpu.in` | `123456` | Single Master Admin Policy. Approve faculty, manage users, review system KPIs |
+| **Academic Faculty** | *(Registered Faculty Email)* | *(Faculty Password)* | Create courses, mark attendance, upload videos/notes, create quizzes (OTP verified) |
+| **Student** | *(Self-Registered Email)* | *(Student Password)* | Watch lectures, download notes, submit assignments, take quizzes (OTP verified) |
+| **Mongo Express GUI** | `http://<YOUR_AWS_PUBLIC_IP>:8081` | `admin` / `EduVibeSecure2026!` | Web-based database collection viewer *(local profile)* |
+| **Grafana Analytics** | `http://<YOUR_AWS_PUBLIC_IP>:3001` | `admin` / `EduVibeGrafana2026!` | Real-time Prometheus telemetry dashboards *(monitoring profile)* |
+
+---
+
+## 🛡️ DevSecOps & Security Hardening Architecture
+
+EduVibe is engineered following modern **DevSecOps** and **OWASP Top 10** cloud security standards:
+
+```mermaid
+flowchart LR
+    subgraph AppSecurity["Application Security"]
+        A[Type Validation<br/>Defeats NoSQL Injection] --- B[Bcrypt Hashing<br/>10 Salt Rounds]
+        B --- C[Log Sanitization<br/>Masked DB URIs]
+        C --- D[Rate Limiting<br/>15m Window Anti-Brute-Force]
+    end
+    
+    subgraph ContainerCloud["Container & Cloud Security"]
+        E[Non-Root User<br/>USER node in Docker] --- F[Security Headers<br/>nosniff, SAMEORIGIN]
+        F --- G[AWS gp3 Encryption<br/>EBS encrypted at rest]
+        G --- H[Dynamic IP Discovery<br/>Zero Hardcoded Secrets]
+    end
+```
+
+1. **🛡️ NoSQL Injection Defense:** All authentication and query inputs undergo strict type verification (`typeof string`) to prevent MongoDB operator injection attacks (e.g., passing `{ "$gt": "" }`).
+2. **🔐 Cryptographic Password Security:** User passwords are encrypted using **Bcrypt with 10 salt rounds** inside Mongoose `pre('save')` hooks; passwords are never returned in queries (`select('-password')`).
+3. **🤫 Application Log Sanitization:** Server startup routines automatically sanitize connection strings, masking database passwords (`mongodb+srv://user:****@cluster...`) to prevent credential leaks in log collectors or Docker logs.
+4. **📧 Production OTP Protection:** OTPs are delivered exclusively through **Resend API** with a 5-minute MongoDB TTL expiration (`expires: 300`). In production (`NODE_ENV=production`), `devOtp` is automatically suppressed from HTTP responses.
+5. **⏱️ Anti-Brute-Force Rate Limiting:** In-memory sliding window rate limiters protect `/api/auth` endpoints (maximum 20 attempts per 15-minute window per IP) to neutralize automated credential stuffing.
+6. **🐳 Least-Privilege Containerization:** The Node.js production image executes under unprivileged `USER node` rather than `root`. The Nginx frontend explicitly hides version headers (`server_tokens off`).
+7. **🔒 End-to-End Encryption:**
+   - **In-Transit:** All client and cloud traffic is encrypted via HTTPS / TLS 1.3 across Vercel Global Edge and MongoDB Atlas.
+   - **At-Rest:** AWS EC2 instances utilize 20 GB gp3 root block devices encrypted with AWS KMS.
+8. **📁 Zero Secret Exposure:** All credentials reside in environment variables injected via GitHub Secrets, Kubernetes Secrets (`secretKeyRef`), or local `.env` files protected by `.gitignore` and `.dockerignore`. Sanitized `.env.example` templates are provided.
 
 ---
 

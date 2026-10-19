@@ -19,6 +19,7 @@ devops/terraform/.terraform/
 # Environment Variables & Secrets
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 
@@ -39,9 +40,11 @@ pnpm-debug.log*
 *.swp
 *.swo
 
-# OS generated files
+# OS generated files & Python Cache
 .DS_Store
 Thumbs.db
+__pycache__/
+*.pyc
 
 # Local Project Documentation & PDF generator (Excluded from Git)
 EduVibe_Three_Methods_To_Run_Projects.pdf
