@@ -550,39 +550,42 @@ Access to EduVibe is strictly role-based:
 ```text
 EduVibe-LMS/
 ├── assets/
-│   └── eduvibe-banner.jpg      # Hero banner image
+│   └── eduvibe-banner.jpg      # Project hero banner image
 │
-├── frontend/                   # React 18 Frontend
+├── frontend/                   # React 18 + Vite Web Application
 │   ├── src/
 │   │   ├── pages/              # Login, Student, Faculty & Admin Dashboards
-│   │   ├── components/         # Background animation, icons, theme toggles
-│   │   ├── context/            # AuthContext (JWT session management)
+│   │   ├── components/         # Glassmorphic UI cards, navbars & modals
+│   │   ├── context/            # AuthContext (JWT session state management)
+│   │   ├── App.jsx             # Protected client routes & role-based gatekeeper
 │   │   └── index.css           # Modern glassmorphism CSS design system
-│   ├── vercel.json             # Vercel edge reverse proxy configuration
-│   ├── Dockerfile              # Multi-stage Nginx container build
-│   └── nginx.conf              # Reverse proxy & security headers
+│   ├── Dockerfile              # Multi-stage production Nginx container build
+│   ├── nginx.conf              # Reverse proxy, SPA routing & security headers
+│   ├── vercel.json             # Vercel global edge rewrites & reverse proxy
+│   └── vite.config.js          # Vite bundler & local dev server proxy
 │
-├── backend/                    # Node.js Express REST API
-│   ├── models/                 # User, Course, Attendance, Quiz, Assignment
-│   ├── routes/                 # auth.js, student.js, faculty.js, admin.js
-│   ├── middleware/             # JWT auth validation & Multer file uploads
-│   ├── utils/                  # Resend transactional email OTP service
-│   ├── server.js               # Express application & /metrics endpoint
-│   ├── Dockerfile              # Lightweight Node.js 20 Alpine container
-│   └── uploads/                # Directory for uploaded notes & videos
+├── backend/                    # Node.js + Express REST API Server
+│   ├── models/                 # Mongoose schemas (User, Course, Attendance, Quiz, OTP)
+│   ├── routes/                 # API routers: auth.js, student.js, faculty.js, admin.js
+│   ├── middleware/             # JWT token authentication & Multer upload handling
+│   ├── utils/                  # Resend email service for transactional 6-digit OTP delivery
+│   ├── server.js               # Express application initialization & Prometheus /metrics
+│   ├── Dockerfile              # Production Node.js 20 Alpine container build
+│   └── uploads/                # Persistent volume storage for course PDFs & videos
 │
-├── devops/
-│   ├── terraform/              # AWS Infrastructure as Code (EC2, SG, IAM)
-│   ├── k8s/                    # Kubernetes manifests (Deployments, Services)
-│   └── monitoring/             # Prometheus scrape configuration & Grafana dashboard
+├── devops/                     # Cloud & Container Infrastructure
+│   ├── k8s/                    # Kubernetes manifests (5 Backend Replicas, Frontend, Ingress)
+│   ├── monitoring/             # Prometheus scrape configs & Grafana dashboard JSON
+│   └── terraform/              # AWS Infrastructure as Code (EC2, Security Groups, IAM)
 │
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml          # GitHub Actions CI/CD Pipeline
+│       └── deploy.yml          # Automated GitHub Actions CI/CD deployment pipeline
 │
-├── docker-compose.yml          # Multi-container orchestration definition
+├── docker-compose.yml          # Multi-container orchestration (App, DB GUI, Monitoring)
 ├── documentation.txt           # In-depth architectural & build reference manual
-└── README.md                   # Project overview & quickstart guide
+├── .env.example                # Environment variable template for local & cloud setup
+└── README.md                   # Project overview, cloud runbooks & deployment guide
 ```
 
 ---
