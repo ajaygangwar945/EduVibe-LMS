@@ -20,31 +20,11 @@
 
 ---
 
-## 🚀 Live Website
-
-The project is fully deployed and accessible online.  
-
-[![Live](https://img.shields.io/badge/Live-Visit%20Site-brightgreen?style=for-the-badge)](https://edu-vibe-lms.vercel.app/)
-
-- ⚡ **Live Production API:** [https://eduvibe-lms-backend-api.onrender.com/api/health](https://eduvibe-lms-backend-api.onrender.com/api/health)
-- 📊 **Live Telemetry & Metrics:** [https://eduvibe-lms-backend-api.onrender.com/metrics](https://eduvibe-lms-backend-api.onrender.com/metrics)
-- 📖 **Full Engineering Manual:** [`documentation.txt`](https://github.com/ajaygangwar945/EduVibe-LMS/blob/main/documentation.txt)
-
----
-
 ## 💡 About The Project (What is EduVibe?)
 
 **EduVibe** is an all-in-one, modern Learning Management System (LMS) and Academic Portal designed to make institutional operations effortless for students, teachers, and administrators. 
 
 Instead of juggling different tools for attendance, course notes, video lectures, and quizzes, EduVibe brings everything into one unified, responsive platform with a modern glassmorphic interface and real-time cloud automation.
-
-### 👥 Who is it for?
-
-| Role | What They Can Do |
-| :--- | :--- |
-| 👨‍🎓 **Students** | • Watch recorded video lectures inside the browser<br/>• Download lecture slides and PDF study notes<br/>• Take timed, auto-graded quizzes with instant score feedback<br/>• Submit assignments online with real-time status<br/>• Track personal attendance with a 75% minimum warning alert |
-| 👩‍🏫 **Faculty** | • Create and manage courses with syllabus details<br/>• Upload study materials (PDF documents & video recordings)<br/>• Mark daily attendance (Present / Absent) by subject and date<br/>• Build custom timed quizzes with multiple-choice questions<br/>• Review, grade, and leave feedback on student assignments |
-| 🛡️ **Administrator** | • View system-wide statistics (total users, active courses, enrollment)<br/>• Review and approve new faculty registration requests<br/>• Maintain user accounts under a single master administrator policy |
 
 ---
 
@@ -60,6 +40,18 @@ Here is what makes EduVibe powerful, simple, and reliable:
 - 🎨 **Modern Glassmorphic UI:** Clean, intuitive interface with smooth animations, responsive layouts for mobile and desktop, and toggleable Dark & Light themes.
 - ☁️ **Production Cloud & DevOps:** Deployed with high availability across AWS (EC2, S3, CloudFront), Vercel Global Edge, and Render with automated CI/CD via GitHub Actions.
 - 📊 **Real-Time Monitoring:** Live Prometheus `/metrics` telemetry and Grafana dashboards for monitoring latency, request volume, and server health.
+
+---
+
+## 🚀 Live Website
+
+The project is fully deployed and accessible online.  
+
+[![Live](https://img.shields.io/badge/Live-Visit%20Site-brightgreen?style=for-the-badge)](https://edu-vibe-lms.vercel.app/)
+
+- ⚡ **Live Production API:** [https://eduvibe-lms-backend-api.onrender.com/api/health](https://eduvibe-lms-backend-api.onrender.com/api/health)
+- 📊 **Live Telemetry & Metrics:** [https://eduvibe-lms-backend-api.onrender.com/metrics](https://eduvibe-lms-backend-api.onrender.com/metrics)
+- 📖 **Full Engineering Manual:** [`documentation.txt`](https://github.com/ajaygangwar945/EduVibe-LMS/blob/main/documentation.txt)
 
 ---
 
