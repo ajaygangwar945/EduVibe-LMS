@@ -4,7 +4,7 @@
 
 <div align="center">
 
-# 🎓 EduVibe — Next-Gen Learning Management & Academic Portal
+# 🎓 EduVibe - Next-Gen Learning Management & Academic Portal
 
 [![Vercel Live](https://img.shields.io/badge/Vercel-Live%20Website-black?style=for-the-badge&logo=vercel)](https://edu-vibe-lms.vercel.app/)
 [![Render API](https://img.shields.io/badge/Render-Live%20API-46E3B7?style=for-the-badge&logo=render&logoColor=black)](https://eduvibe-lms-backend-api.onrender.com/api/health)
@@ -20,28 +20,46 @@
 
 ---
 
-## 🚀 Live Demo & Links
+## 🚀 Live Website
 
-- 🌐 **Live Web Application:** [https://edu-vibe-lms.vercel.app/](https://edu-vibe-lms.vercel.app/)
+The project is fully deployed and accessible online.  
+
+[![Live](https://img.shields.io/badge/Live-Visit%20Site-brightgreen?style=for-the-badge)](https://edu-vibe-lms.vercel.app/)
+
 - ⚡ **Live Production API:** [https://eduvibe-lms-backend-api.onrender.com/api/health](https://eduvibe-lms-backend-api.onrender.com/api/health)
 - 📊 **Live Telemetry & Metrics:** [https://eduvibe-lms-backend-api.onrender.com/metrics](https://eduvibe-lms-backend-api.onrender.com/metrics)
-- 📖 **Full Engineering Manual:** [`documentation.txt`](documentation.txt)
+- 📖 **Full Engineering Manual:** [`documentation.txt`](https://github.com/ajaygangwar945/EduVibe-LMS/blob/main/documentation.txt)
 
 ---
 
-## 💡 What is EduVibe?
+## 💡 About The Project (What is EduVibe?)
 
 **EduVibe** is an all-in-one, modern Learning Management System (LMS) and Academic Portal designed to make institutional operations effortless for students, teachers, and administrators. 
 
 Instead of juggling different tools for attendance, course notes, video lectures, and quizzes, EduVibe brings everything into one unified, responsive platform with a modern glassmorphic interface and real-time cloud automation.
 
-### Who is it for?
+### 👥 Who is it for?
 
 | Role | What They Can Do |
 | :--- | :--- |
-| 👨‍🎓 **Students** | • Watch recorded video lectures inside the browser<br/>• Download lecture slides and PDF study notes<br/>• Take timed, auto-graded quizzes with instant score feedback<br/>• Submit assignments online<br/>• Track personal attendance with a 75% minimum warning alert |
-| 👩‍🏫 **Faculty** | • Create and manage courses with syllabus details<br/>• Upload study materials (PDF documents & video recordings)<br/>• Mark daily attendance (Present / Absent) by subject and date<br/>• Build custom timed quizzes with multiple-choice questions<br/>• Review and grade student assignment submissions |
+| 👨‍🎓 **Students** | • Watch recorded video lectures inside the browser<br/>• Download lecture slides and PDF study notes<br/>• Take timed, auto-graded quizzes with instant score feedback<br/>• Submit assignments online with real-time status<br/>• Track personal attendance with a 75% minimum warning alert |
+| 👩‍🏫 **Faculty** | • Create and manage courses with syllabus details<br/>• Upload study materials (PDF documents & video recordings)<br/>• Mark daily attendance (Present / Absent) by subject and date<br/>• Build custom timed quizzes with multiple-choice questions<br/>• Review, grade, and leave feedback on student assignments |
 | 🛡️ **Administrator** | • View system-wide statistics (total users, active courses, enrollment)<br/>• Review and approve new faculty registration requests<br/>• Maintain user accounts under a single master administrator policy |
+
+---
+
+## ✨ Key Features
+
+Here is what makes EduVibe powerful, simple, and reliable:
+
+- 🔐 **Simple & Secure Authentication:** Fast email verification with 6-digit OTP codes (powered by Resend) and industry-standard Bcrypt password encryption.
+- 📚 **Courses & Study Materials:** Teachers can publish courses, upload lecture notes (PDFs), and post recorded video lectures that students can stream right inside their browser.
+- ⏱️ **Interactive Quizzes with Instant Grading:** Students take timed multiple-choice quizzes with live countdown timers and receive automatic score feedback immediately upon submission.
+- 📅 **Smart Attendance Tracking:** Faculty mark daily attendance in seconds; students get real-time percentage calculations and visual alerts if attendance falls below 75%.
+- 📝 **Digital Assignment Submissions:** Students submit homework online, and faculty can review, grade, and provide remarks in real time.
+- 🎨 **Modern Glassmorphic UI:** Clean, intuitive interface with smooth animations, responsive layouts for mobile and desktop, and toggleable Dark & Light themes.
+- ☁️ **Production Cloud & DevOps:** Deployed with high availability across AWS (EC2, S3, CloudFront), Vercel Global Edge, and Render with automated CI/CD via GitHub Actions.
+- 📊 **Real-Time Monitoring:** Live Prometheus `/metrics` telemetry and Grafana dashboards for monitoring latency, request volume, and server health.
 
 ---
 
