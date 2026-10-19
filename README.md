@@ -24,8 +24,6 @@
 
 Welcome to EduVibe — Next-Gen Learning Management & Academic Portal! This platform is designed to make academic management effortless for students, faculty, and administrators by uniting course notes, video lectures, attendance tracking, and quizzes into one simple, modern web application.
 
----
-
 ## ✨ Key Features
 
 - 📚 **Courses & Study Materials** - Browse syllabus, download PDF notes, and stream video lectures
@@ -190,7 +188,9 @@ You can run EduVibe in whichever way fits your setup:
 Best if you want to make changes to the code with instant browser refresh.
 
 #### 1. Setup Environment Files
+
 Copy the example environment templates:
+
 ```bash
 # In the root folder:
 cp .env.example .env
@@ -198,22 +198,27 @@ cp .env.example .env
 # In the backend folder:
 cp backend/.env.example backend/.env
 ```
+
 *(Add your MongoDB connection string and Resend API key to `.env`).*
 
 #### 2. Start the Backend API (Terminal 1)
+
 ```powershell
 cd backend
 npm install
 npm run dev
 ```
+
 *Backend runs on `http://localhost:5000`.*
 
 #### 3. Start the Frontend (Terminal 2)
+
 ```powershell
 cd frontend
 npm install
 npm run dev
 ```
+
 *Open `http://localhost:5173` in your browser.*
 
 ---
@@ -231,6 +236,7 @@ docker compose --profile monitoring up -d
 ```
 
 **Local Docker Service Ports:**
+
 - 🎓 **Web Portal:** [http://localhost:3005](http://localhost:3005)
 - ⚡ **Backend API:** [http://localhost:5000/api/health](http://localhost:5000/api/health)
 - 🍃 **Mongo Express Database Viewer:** [http://localhost:8081](http://localhost:8081)
