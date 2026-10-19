@@ -119,10 +119,10 @@ You can run EduVibe in whichever way fits your setup:
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                             CHOOSE YOUR EXECUTION METHOD                               │
 ├────────────────────┬────────────────────┬─────────────────────┬────────────────────────┤
-│ 1. Local (npm)     │ 2. Docker Compose  │ 3. AWS + Vercel     │ 4. Vercel + Render     │
+│ 1. Local (npm)     │ 2. Docker / K8s    │ 3. AWS + Vercel     │ 4. Vercel + Render     │
 ├────────────────────┼────────────────────┼─────────────────────┼────────────────────────┤
-│ • Fast coding      │ • 1 command start  │ • Real AWS EC2      │ • Always live 24/7     │
-│ • Hot reloading    │ • Isolated sandbox │ • Terraform IaC     │ • Zero maintenance     │
+│ • Fast coding      │ • Compose & K8s    │ • Real AWS EC2      │ • Always live 24/7     │
+│ • Hot reloading    │ • 5 Pod replicas   │ • Terraform IaC     │ • Zero maintenance     │
 │ • Vite + Express   │ • Full stack ready │ • GitHub Actions CD │ • $0.00 free tier      │
 └────────────────────┴────────────────────┴─────────────────────┴────────────────────────┘
 ```
@@ -205,27 +205,29 @@ npm run dev
 
 ---
 
-### 🐳 Method 2: Docker Compose (All-in-One Container Stack)
+### 🐳 Method 2: Desktop Containers & Kubernetes (Docker Compose & Minikube)
 
 ---
 
-Best if you have Docker Desktop installed and want to run the entire multi-container environment with a single command.
+Best if you have Docker Desktop or Minikube installed and want to run the application in isolated, reproducible Linux containers.
 
-#### 1. Choose Your Run Mode
+#### 📦 Option 2.1: Docker Compose (Multi-Container Desktop Engine)
 
-##### Option A: Core Application Stack (Frontend + Backend)
+##### 1. Choose Your Run Mode
+
+###### Mode A: Core Application Stack (Frontend + Backend)
 Starts the React Nginx web client and Express REST API:
 ```bash
 docker compose up -d
 ```
 
-##### Option B: Full Observability Stack (Core + Prometheus + Grafana)
+###### Mode B: Full Observability Stack (Core + Prometheus + Grafana)
 Starts the entire system including real-time monitoring and dashboards:
 ```bash
 docker compose --profile monitoring up -d
 ```
 
-#### 📍 Local Docker Service Ports & Endpoints
+##### 📍 Local Docker Service Ports & Endpoints
 
 - 🎓 **Web Portal (Frontend):** [http://localhost:3005](http://localhost:3005) (Nginx reverse proxy container)
 - ⚡ **Backend API Server:** [http://localhost:5000](http://localhost:5000) (Health check: [http://localhost:5000/api/health](http://localhost:5000/api/health))
@@ -234,7 +236,7 @@ docker compose --profile monitoring up -d
 - 📈 **Prometheus Server:** [http://localhost:9090](http://localhost:9090) (Scrapes `/metrics` across `eduvibe-network`)
 - 📉 **Grafana Dashboards:** [http://localhost:3001](http://localhost:3001) (Pre-configured real-time metrics visualizer)
 
-#### 🗺️ Docker Compose Architecture
+##### 🗺️ Docker Compose Architecture
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -264,11 +266,107 @@ docker compose --profile monitoring up -d
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-#### 2. Stop Containers Safely
-
-To shut down all running containers and free system memory (preserves persistent volumes):
+##### 🛑 Stop Docker Compose Stack
 ```bash
+# Stops stack safely; uploads and data volumes preserved:
 docker compose --profile monitoring down
+```
+
+---
+
+#### ☸️ Option 2.2: Minikube (Local Kubernetes Cluster with 5 Replicas)
+
+Deploy EduVibe onto a local single-node Kubernetes cluster featuring 8 total Pods (including 5 load-balanced Backend replicas, PVC storage, Prometheus, and Grafana).
+
+##### 1. Start Minikube & Configure Docker Environment
+```powershell
+# Start local Kubernetes control-plane:
+minikube start --driver=docker
+
+# Point your terminal Docker CLI to Minikube's internal registry:
+minikube docker-env | Invoke-Expression
+```
+
+##### 2. Build Container Images Inside Minikube
+```bash
+docker build -t eduvibe-backend:latest ./backend
+docker build -t eduvibe-frontend:latest ./frontend
+```
+
+##### 3. Deploy Kubernetes Manifests & In-Cluster Secrets
+```bash
+# 1. Create dedicated 'eduvibe' isolated namespace:
+kubectl apply -f devops/k8s/namespace.yaml
+
+# 2. Inject environment secrets directly from your root .env file:
+kubectl create secret generic eduvibe-secrets --namespace=eduvibe --from-env-file=".env" --dry-run=client -o yaml | kubectl apply -f -
+
+# 3. Deploy Backend (5 Pod Replicas + PVC), Frontend (Nginx), and Monitoring:
+kubectl apply -f devops/k8s/backend.yaml
+kubectl apply -f devops/k8s/frontend.yaml
+kubectl apply -f devops/k8s/monitoring.yaml
+```
+
+##### 4. Verify Cluster Health & Pods
+```bash
+kubectl get pods -n eduvibe -o wide
+kubectl get deployments -n eduvibe
+```
+*(Confirms backend `5/5 READY`, frontend `1/1 READY`, prometheus `1/1 READY`, and grafana `1/1 READY`).*
+
+##### 📍 Minikube Service Ports & Endpoints
+
+- 🎓 **Web Portal (Frontend Pod):** [http://localhost:3006](http://localhost:3006) (Run: `kubectl port-forward svc/frontend -n eduvibe 3006:80` or `minikube service frontend -n eduvibe`)
+- ⚡ **Backend API Service:** Port `5000` (ClusterIP load-balancing across 5 backend pod replicas)
+- 📊 **Prometheus Exporter:** Port `5000/metrics` (Scraped in-cluster by Prometheus pod)
+- 🍃 **Database:** MongoDB Atlas Cloud (Injected via Kubernetes Secret `eduvibe-secrets`)
+- 📈 **Prometheus Server:** Port `9090` (In-cluster NodePort monitoring service)
+- 📉 **Grafana Dashboard:** [http://localhost:3002](http://localhost:3002) (Run: `kubectl port-forward svc/grafana -n eduvibe 3002:3000`)
+- ☸️ **Kubernetes Console:** `minikube dashboard` (Launches official Kubernetes web dashboard)
+
+##### 🗺️ Minikube Kubernetes Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        MINIKUBE KUBERNETES CLUSTER                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   User Browser                                                              │
+│         │                                                                   │
+│         │ HTTP (Port 3006 via port-forward)                                 │
+│         ▼                                                                   │
+│   [k8s: frontend-deployment] (1 Pod / Nginx Service)                        │
+│         │                                                                   │
+│         │ Internal Cluster DNS (http://backend:5000)                        │
+│         ▼                                                                   │
+│   [k8s: backend-service] ──── (ClusterIP Service)                           │
+│         ├───► [Pod: backend-replica-1] ───► [MongoDB Atlas Cloud]           │
+│         ├───► [Pod: backend-replica-2] ───► [Resend (6-Digit OTPs)]         │
+│         ├───► [Pod: backend-replica-3]                                      │
+│         ├───► [Pod: backend-replica-4]                                      │
+│         └───► [Pod: backend-replica-5] ───► [PVC: backend-uploads-pvc]      │
+│                     │                                                       │
+│                     │ Scrapes /metrics                                      │
+│                     ▼                                                       │
+│   [k8s: prometheus-deployment] (Port 9090)                                  │
+│         │                                                                   │
+│         │ Visualizes Metrics                                                │
+│         ▼                                                                   │
+│   [k8s: grafana-deployment] (Port 3002 via port-forward)                    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+##### 🛑 Stop & Clean Up Minikube
+```bash
+# Safely pause the cluster (preserves pods and PVC storage):
+minikube stop
+
+# OR delete the eduvibe namespace completely:
+kubectl delete namespace eduvibe
+
+# Complete wipe (deletes local Minikube cluster VM):
+minikube delete
 ```
 
 ---
