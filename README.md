@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/eduvibe-banner.svg" alt="EduVibe - Next-Gen Learning Management & Academic Portal" width="100%">
+  <img src="assets/eduvibe-banner.jpg" alt="EduVibe - Next-Gen Learning Management & Academic Portal" width="100%" height="200" style="object-fit: cover; border-radius: 8px;">
 </p>
 
 # 🎓 EduVibe — Next-Gen Learning Management & Academic Portal
@@ -22,7 +22,6 @@
 - ⚡ **Live Production API:** [https://eduvibe-lms-backend-api.onrender.com/api/health](https://eduvibe-lms-backend-api.onrender.com/api/health)
 - 📊 **Live Telemetry & Metrics:** [https://eduvibe-lms-backend-api.onrender.com/metrics](https://eduvibe-lms-backend-api.onrender.com/metrics)
 - 📖 **Full Engineering Manual:** [`documentation.txt`](documentation.txt)
-- 📑 **Comprehensive Operational PDF Guide:** [`EduVibe-LMS-Guide.pdf`](EduVibe-LMS-Guide.pdf)
 
 ---
 
@@ -169,7 +168,7 @@ You can run EduVibe in whichever way fits your setup:
 │ 1. Local (npm)     │ 2. Docker Compose  │ 3. AWS + Vercel     │ 4. Vercel + Render     │
 ├────────────────────┼────────────────────┼─────────────────────┼────────────────────────┤
 │ • Fast coding      │ • 1 command start  │ • Real AWS EC2      │ • Always live 24/7     │
-│ • Hot reloading    │ • Isolated sandbox │ • Terraform IaC     │ • Zero maintenance    │
+│ • Hot reloading    │ • Isolated sandbox │ • Terraform IaC     │ • Zero maintenance     │
 │ • Vite + Express   │ • Full stack ready │ • GitHub Actions CD │ • $0.00 free tier      │
 └────────────────────┴────────────────────┴─────────────────────┴────────────────────────┘
 ```
@@ -301,8 +300,7 @@ EduVibe is built with defense-in-depth principles:
 ```text
 EduVibe-LMS/
 ├── assets/
-│   ├── eduvibe-banner.svg      # Clean vector SVG brand banner
-│   └── eduvibe-banner.jpg      # Hero image banner
+│   └── eduvibe-banner.jpg      # Hero banner image
 │
 ├── frontend/                   # React 18 Frontend
 │   ├── src/
@@ -334,7 +332,6 @@ EduVibe-LMS/
 │
 ├── docker-compose.yml          # Multi-container orchestration definition
 ├── documentation.txt           # In-depth architectural & build reference manual
-├── EduVibe-LMS-Guide.pdf       # Comprehensive 7-page operational runbook
 └── README.md                   # Project overview & quickstart guide
 ```
 
