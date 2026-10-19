@@ -512,7 +512,7 @@ Always-available, 24/7 permanent production deployment requiring **$0.00 infrast
 │         │                                                                   │
 │         │ Automatic Webhook Container Builds & Zero-Downtime Rollouts       │
 │         ▼                                                                   │
-│   [Production Cloud Tier] ───── ($0.00 Infrastructure Cost & 24/7 Uptime)     │
+│   [Production Cloud Tier] ───── ($0.00 Infrastructure Cost & 24/7 Uptime)   │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -542,21 +542,6 @@ Access to EduVibe is strictly role-based:
 | **Student** | Registered Student Email | User-defined password | Watch videos, download notes, take quizzes, submit assignments, track attendance percentage. |
 | **Mongo Express GUI** | Configured in `.env` (`MONGO_EXPRESS_USER`) | Configured in `.env` (`MONGO_EXPRESS_PASSWORD`) | Web-based database collection inspection tool *(Docker profile)*. |
 | **Grafana Analytics** | Configured in `.env` (`GRAFANA_ADMIN_USER`) | Configured in `.env` (`GRAFANA_ADMIN_PASSWORD`) | Telemetry dashboards showing server load and request response times. |
-
----
-
-## 🛡️ Security Hardening Highlights
-
-EduVibe is built with defense-in-depth principles:
-
-1. **NoSQL Injection Protection:** Every input undergoes type checking (`typeof string`) to prevent MongoDB operator injection.
-2. **Bcrypt Password Hashing:** User passwords are encrypted with 10 salt rounds before hitting the database.
-3. **Log Sanitization:** Server connection logs automatically mask database passwords (`mongodb+srv://user:****@cluster...`).
-4. **OTP Protection:** Verification codes expire automatically after 5 minutes and are never leaked in production HTTP responses.
-5. **Rate Limiting:** Authentication routes are protected against brute-force attacks (maximum 20 attempts per 15-minute window).
-6. **Non-Root Containers:** Backend Docker containers run under the unprivileged `USER node` account.
-7. **Security Headers:** Reverse proxy enforces `X-Content-Type-Options: nosniff` and `X-Frame-Options: SAMEORIGIN`.
-8. **End-to-End Encryption:** All communication is encrypted via HTTPS / TLS 1.3, and cloud storage volumes are encrypted at rest.
 
 ---
 
