@@ -171,6 +171,8 @@ npm run dev
 
 ### 🐳 Method 2: Docker Compose (All-in-One Container Stack)
 
+---
+
 Best if you have Docker Desktop installed and want to run everything with a single command.
 
 ```bash
