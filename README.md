@@ -49,8 +49,6 @@ The project is fully deployed and accessible online.
 
 EduVibe is designed with a modern, decoupled cloud architecture that keeps the frontend fast, the backend scalable, and operations fully automated.
 
-### 1. High-Level System Architecture
-
 ```mermaid
 flowchart TD
     subgraph Clients["🌐 End Users"]
@@ -94,54 +92,6 @@ flowchart TD
     API -.-> Metrics
     Metrics -.-> Prom
     Prom --> Graf
-```
-
-### 2. User Authentication & 6-Digit OTP Flow
-
-To ensure only verified users register and access the portal, EduVibe uses secure email verification powered by **Resend**:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as 👤 Student / Faculty
-    participant UI as 💻 React Frontend
-    participant API as ⚙️ Express Backend
-    participant Mail as 📧 Resend Email API
-    participant DB as 🍃 MongoDB Atlas
-
-    User->>UI: Enters Email & Details (Sign Up / Reset Password)
-    UI->>API: POST /api/auth/send-otp
-    API->>API: Generates Secure 6-Digit Numeric OTP
-    API->>DB: Stores OTP with 5-Minute TTL Expiration
-    API->>Mail: Sends OTP Email via Resend API
-    Mail-->>User: Delivers 6-Digit Code to Inbox
-    User->>UI: Enters 6-Digit Code & Password
-    UI->>API: POST /api/auth/register or verify-otp
-    API->>DB: Validates Code & Checks Expiration
-    API->>DB: Hashes Password (Bcrypt, 10 rounds) & Saves User
-    API-->>UI: Returns Signed JWT Token
-    UI-->>User: Grants Instant Access to Dashboard
-```
-
-### 3. Automated CI/CD Deployment Pipeline
-
-EduVibe uses **GitHub Actions** ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)) to run automated tests, build container images, and deploy code to AWS EC2 without downtime:
-
-```mermaid
-flowchart LR
-    Push["👨‍💻 git push origin main"] --> Stage1
-    
-    subgraph CI["Continuous Integration (GitHub Runners)"]
-        Stage1["🧪 Stage 1: Syntax & Quality<br/>Tests 100% of Backend JS Files"] --> Stage2["🐳 Stage 2: Container Verification<br/>Builds Frontend & Backend Images"]
-    end
-
-    subgraph CD["Continuous Deployment (AWS EC2 Mumbai)"]
-        Stage2 --> Stage3["🔍 Stage 3: Dynamic IP Discovery<br/>Queries AWS API via Instance ID"]
-        Stage3 --> Stage4["🚀 Stage 4: Remote Deploy via SSH<br/>Pulls Code & Rebuilds Containers"]
-        Stage4 --> Stage5["🧹 Stage 5: Prune Disk Space<br/>Cleans Old Docker Images"]
-    end
-
-    Stage5 --> Live["✅ Live EC2 Service Updated!"]
 ```
 
 ---
