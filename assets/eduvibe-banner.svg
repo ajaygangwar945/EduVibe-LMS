@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 80" width="540" height="80">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 70" width="540" height="70">
   <defs>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0F172A"/>
-      <stop offset="50%" stop-color="#1E293B"/>
+      <stop offset="60%" stop-color="#1E293B"/>
       <stop offset="100%" stop-color="#0F172A"/>
     </linearGradient>
     <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -12,39 +12,35 @@
     </linearGradient>
   </defs>
 
-  <!-- Background Card -->
-  <rect x="0" y="0" width="540" height="80" rx="8" fill="url(#bgGrad)" stroke="#334155" stroke-width="1"/>
+  <!-- Background Card (Clipped within exact 540x70 bounds) -->
+  <rect x="0" y="0" width="540" height="70" rx="8" fill="url(#bgGrad)" stroke="#334155" stroke-width="1"/>
 
   <!-- Top Accent Stripe -->
-  <rect x="0" y="0" width="540" height="4" rx="2" fill="url(#accentGrad)"/>
-
-  <!-- Geometric / Abstract Grid Elements -->
-  <circle cx="500" cy="40" r="60" fill="#2563EB" opacity="0.08"/>
-  <circle cx="510" cy="40" r="35" fill="#38BDF8" opacity="0.10"/>
-  <circle cx="40" cy="40" r="45" fill="#10B981" opacity="0.06"/>
+  <rect x="0" y="0" width="540" height="3.5" rx="2" fill="url(#accentGrad)"/>
 
   <!-- Brand Icon Badge -->
-  <rect x="20" y="18" width="44" height="44" rx="8" fill="#1E293B" stroke="#2563EB" stroke-width="1.5"/>
-  <path d="M42 26 L55 33 L42 40 L29 33 Z" fill="#38BDF8"/>
-  <path d="M34 38 L34 48 Q42 53 50 48 L50 38 Q42 43 34 38 Z" fill="#2563EB"/>
-  <path d="M53 36 L53 46" stroke="#10B981" stroke-width="2" stroke-linecap="round"/>
+  <rect x="18" y="14" width="42" height="42" rx="8" fill="#1E293B" stroke="#2563EB" stroke-width="1.2"/>
+  <polygon points="39,22 53,29 39,36 25,29" fill="#38BDF8"/>
+  <path d="M30 34.5 L30 43 Q39 47 48 43 L48 34.5 Q39 39 30 34.5 Z" fill="#2563EB"/>
+  <line x1="51" y1="31" x2="51" y2="42" stroke="#10B981" stroke-width="1.8" stroke-linecap="round"/>
+  <circle cx="51" cy="42" r="1.5" fill="#10B981"/>
 
   <!-- Brand Typography -->
-  <text x="76" y="38" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#FFFFFF" letter-spacing="0.5">EduVibe</text>
-  <text x="165" y="38" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#38BDF8">LMS</text>
+  <text x="72" y="34" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="bold" fill="#FFFFFF">EduVibe</text>
+  <text x="152" y="34" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#38BDF8">LMS</text>
   
-  <text x="76" y="56" font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="normal" fill="#94A3B8">Next-Gen Learning Management &amp; Academic Portal</text>
+  <text x="72" y="51" font-family="Helvetica, Arial, sans-serif" font-size="8.5" font-weight="normal" fill="#94A3B8">Next-Gen Learning Management &amp; Academic Portal</text>
 
-  <!-- Status / Feature Badges on Right -->
-  <rect x="365" y="24" width="75" height="18" rx="4" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
-  <text x="373" y="36" font-family="Helvetica, Arial, sans-serif" font-size="7.5" font-weight="bold" fill="#38BDF8">AWS CLOUD</text>
+  <!-- Architecture / Stack Pills -->
+  <rect x="355" y="16" width="78" height="17" rx="4" fill="#0B132B" stroke="#2563EB" stroke-width="0.8"/>
+  <text x="367" y="28" font-family="Helvetica, Arial, sans-serif" font-size="7" font-weight="bold" fill="#60A5FA">AWS CLOUD</text>
 
-  <rect x="448" y="24" width="75" height="18" rx="4" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
-  <text x="456" y="36" font-family="Helvetica, Arial, sans-serif" font-size="7.5" font-weight="bold" fill="#10B981">VERCEL EDGE</text>
+  <rect x="442" y="16" width="82" height="17" rx="4" fill="#0B132B" stroke="#10B981" stroke-width="0.8"/>
+  <text x="453" y="28" font-family="Helvetica, Arial, sans-serif" font-size="7" font-weight="bold" fill="#34D399">VERCEL EDGE</text>
 
-  <rect x="365" y="46" width="75" height="18" rx="4" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
-  <text x="375" y="58" font-family="Helvetica, Arial, sans-serif" font-size="7.5" font-weight="bold" fill="#A855F7">DOCKER K8S</text>
+  <rect x="355" y="38" width="78" height="17" rx="4" fill="#0B132B" stroke="#8B5CF6" stroke-width="0.8"/>
+  <text x="365" y="50" font-family="Helvetica, Arial, sans-serif" font-size="7" font-weight="bold" fill="#A78BFA">DOCKER K8S</text>
 
-  <rect x="448" y="46" width="75" height="18" rx="4" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
-  <text x="454" y="58" font-family="Helvetica, Arial, sans-serif" font-size="7.5" font-weight="bold" fill="#F59E0B">ATLAS MONGO</text>
+  <rect x="442" y="38" width="82" height="17" rx="4" fill="#0B132B" stroke="#F59E0B" stroke-width="0.8"/>
+  <text x="452" y="50" font-family="Helvetica, Arial, sans-serif" font-size="7" font-weight="bold" fill="#FBBF24">ATLAS MONGO</text>
 </svg>
