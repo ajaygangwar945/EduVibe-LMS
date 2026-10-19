@@ -2,6 +2,8 @@
   <img src="assets/eduvibe-banner.jpg" alt="EduVibe - Next-Gen Learning Management & Academic Portal" width="100%" height="200" style="object-fit: cover; border-radius: 8px;">
 </p>
 
+<div align="center">
+
 # 🎓 EduVibe — Next-Gen Learning Management & Academic Portal
 
 [![Vercel Live](https://img.shields.io/badge/Vercel-Live%20Website-black?style=for-the-badge&logo=vercel)](https://edu-vibe-lms.vercel.app/)
@@ -13,6 +15,8 @@
 [![Node.js](https://img.shields.io/badge/Backend-Node.js%20%2B%20Express-339933?style=for-the-badge&logo=node.js)](https://nodejs.org/)
 [![MongoDB](https://img.shields.io/badge/Database-MongoDB%20Atlas-47A248?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)
 [![Prometheus](https://img.shields.io/badge/Monitoring-Prometheus%20%2B%20Grafana-E6522C?style=for-the-badge&logo=prometheus)](https://prometheus.io/)
+
+</div>
 
 ---
 
