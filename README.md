@@ -590,8 +590,10 @@ EduVibe-LMS/
 
 ---
 
-## 👤 Author & Engineering Details
+<div align="center">
 
-- **Ajay Gangwar** — [GitHub Profile](https://github.com/ajaygangwar945)
-- **Project:** EduVibe — Next-Gen Learning Management & Academic Portal
-- **Specialization:** Cloud & DevOps Architecture Engineering
+⭐ **Star this repository if you found it useful**  
+🛡️ **Built with Modern Cloud & DevOps Architecture for Next-Gen Education**
+
+</div>
+
