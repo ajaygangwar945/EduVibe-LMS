@@ -349,7 +349,7 @@ Detailed Stage Breakdown:
 3. Stage 3: Dynamic AWS EC2 State & IP Discovery (`deploy-to-ec2`)
    - Uses `aws-actions/configure-aws-credentials@v4` for secure IAM token authentication.
    - Solves the dynamic IP problem: AWS EC2 standard public IPv4 addresses rotate upon server stop/start.
-   - Queries the AWS EC2 API (`aws ec2 describe-instances`) using the persistent Instance ID (`i-06a67a3041f734369`) or tag `Name=eduvibe-cloud-server`.
+   - Queries the AWS EC2 API (`aws ec2 describe-instances`) using the project tag `Name=eduvibe-cloud-server` or optional `EC2_INSTANCE_ID` secret.
    - Instance State Handling:
      * If EC2 is `stopped` or `stopping`: The workflow safely logs an informational message and skips deployment with a green checkmark (zero false build failures).
      * If EC2 is `running`: Automatically discovers the active public IPv4 address dynamically.
@@ -402,7 +402,7 @@ Security & Secrets Architecture:
   * `AWS_ACCESS_KEY_ID`: IAM programmatic access key for `aws-cli-user`.
   * `AWS_SECRET_ACCESS_KEY`: IAM secret access key for `aws-cli-user`.
   * `AWS_REGION`: `ap-south-1` (Mumbai).
-  * `EC2_INSTANCE_ID`: `i-06a67a3041f734369` (Persistent hardware identifier).
+  * `EC2_INSTANCE_ID`: (Optional) EC2 instance ID for targeted deployment, or left blank to auto-discover via `Name=eduvibe-cloud-server` tag.
   * `EC2_SSH_KEY`: Full private RSA key (`webserver.pem`).
 
 Operational Trigger Methods:
@@ -557,7 +557,7 @@ Step 3: Automated Continuous Deployment (GitHub Actions)
 2. GitHub Actions runner (`ubuntu-latest`) automatically:
    - Validates Node.js 20 backend syntax.
    - Compiles and tests Docker images in cloud isolation.
-   - Discovers live EC2 public IPv4 address dynamically via Instance ID (`i-06a67a3041f734369`).
+   - Discovers live EC2 public IPv4 address dynamically via project tag `Name=eduvibe-cloud-server`.
    - SSHes into EC2, runs atomic `git reset --hard origin/main`, and executes `docker compose up -d --build`.
    - Prunes dangling Docker images (`docker image prune -f`) to protect disk storage.
 
@@ -567,7 +567,7 @@ Step 4: Manual SSH Access & Diagnostics (Optional)
 3. Verify health: `curl http://localhost:5000/api/health`
 
 Step 5: Cost Management / Lifecycle Teardown
-- Pause EC2 Virtual Machine: `aws ec2 stop-instances --instance-ids i-06a67a3041f734369`
+- Pause EC2 Virtual Machine: `aws ec2 stop-instances --instance-ids <YOUR_AWS_EC2_INSTANCE_ID>`
 - Destroy all AWS Infrastructure: `cd devops/terraform && terraform destroy -auto-approve`
 
 --------------------------------------------------------------------------------

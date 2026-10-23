@@ -395,7 +395,7 @@ terraform output
 Every push to the `main` branch automatically triggers the CI/CD pipeline ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)):
 1. Runs full syntax and quality validation on all JavaScript files.
 2. Builds and validates Docker container images.
-3. Dynamically queries AWS EC2 state and public IP via instance ID (`i-0a1c62bc8397f2038`).
+3. Dynamically queries AWS EC2 state and public IP via project tag (`Name=eduvibe-cloud-server`).
 4. Connects via SSH to pull the latest code, rebuild containers, and prune unused images with zero downtime.
 
 ```bash
@@ -458,11 +458,11 @@ curl http://localhost:5000/api/health
 
 - **Pause EC2 Instance** (Stops hourly compute while preserving the 20GB root volume):
   ```bash
-  aws ec2 stop-instances --instance-ids i-0a1c62bc8397f2038
+  aws ec2 stop-instances --instance-ids <YOUR_AWS_EC2_INSTANCE_ID>
   ```
 - **Resume EC2 Instance** (GitHub Actions auto-discovers the new IP upon push):
   ```bash
-  aws ec2 start-instances --instance-ids i-0a1c62bc8397f2038
+  aws ec2 start-instances --instance-ids <YOUR_AWS_EC2_INSTANCE_ID>
   ```
 - **Complete Cloud Teardown** (Terminates all AWS infrastructure in under 45 seconds):
   ```bash
