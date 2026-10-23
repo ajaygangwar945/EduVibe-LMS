@@ -40,10 +40,29 @@ systemctl start docker
 usermod -aG docker ubuntu
 
 # Create application workspace directory
-mkdir -p /home/ubuntu/app
-chown -R ubuntu:ubuntu /home/ubuntu/app
+APP_DIR="/home/ubuntu/app"
+mkdir -p "$APP_DIR"
+
+# Clone or pull latest application repository
+if [ ! -d "$APP_DIR/.git" ]; then
+  git clone https://github.com/ajaygangwar945/EduVibe-LMS.git "$APP_DIR"
+else
+  cd "$APP_DIR" && git pull origin main
+fi
+
+# Ensure .env exists from template if not already present
+if [ ! -f "$APP_DIR/.env" ] && [ -f "$APP_DIR/.env.example" ]; then
+  cp "$APP_DIR/.env.example" "$APP_DIR/.env"
+fi
+
+# Set proper ownership for ubuntu user
+chown -R ubuntu:ubuntu "$APP_DIR"
+
+# Launch application containers via Docker Compose
+cd "$APP_DIR"
+docker compose up -d --build backend frontend
 
 echo "========================================================"
 echo " EduVibe Cloud Server Setup Completed Successfully!     "
-echo " Docker and Docker Compose are ready to run containers! "
+echo " Backend & Frontend Containers are live and running!    "
 echo "========================================================"
