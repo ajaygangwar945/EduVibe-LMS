@@ -88,6 +88,12 @@ jobs:
           echo "Target Instance ID: $TARGET_INSTANCE"
           echo "instance_id=$TARGET_INSTANCE" >> $GITHUB_OUTPUT
 
+          if [ -z "$TARGET_INSTANCE" ] || [ "$TARGET_INSTANCE" = "None" ]; then
+            echo "is_running=false" >> $GITHUB_OUTPUT
+            echo "⚠️ No active EC2 instance found (it may be stopped or destroyed). Skipping deployment safely."
+            exit 0
+          fi
+
           STATE=$(aws ec2 describe-instances --instance-ids "$TARGET_INSTANCE" \
             --query "Reservations[0].Instances[0].State.Name" --output text)
           echo "EC2 Instance State: $STATE"

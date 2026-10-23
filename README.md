@@ -395,7 +395,7 @@ terraform output
 Every push to the `main` branch automatically triggers the CI/CD pipeline ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)):
 1. Runs full syntax and quality validation on all JavaScript files.
 2. Builds and validates Docker container images.
-3. Dynamically queries AWS EC2 state and public IP via instance ID (`i-06a67a3041f734369`).
+3. Dynamically queries AWS EC2 state and public IP via instance ID (`i-0a1c62bc8397f2038`).
 4. Connects via SSH to pull the latest code, rebuild containers, and prune unused images with zero downtime.
 
 ```bash
@@ -415,7 +415,7 @@ curl http://localhost:5000/api/health
 
 - 🌐 **Web Frontend (Vercel Global Edge):** [https://edu-vibe-lms.vercel.app/](https://edu-vibe-lms.vercel.app/)
 - ⚡ **Backend API Server (AWS EC2):** `http://<YOUR_AWS_EC2_IP>:5000` (Health check: `http://<YOUR_AWS_EC2_IP>:5000/api/health`)
-  *(Verified EC2 IP: [`http://16.4.32.15:5000/api/health`](http://16.4.32.15:5000/api/health))*
+  *(Verified EC2 IP: [`http://3.108.237.28:5000/api/health`](http://3.108.237.28:5000/api/health))*
 - 📊 **Prometheus Exporter:** `http://<YOUR_AWS_EC2_IP>:5000/metrics` (Live EC2 container metrics)
 - 🍃 **Database:** MongoDB Atlas M0 Cloud Replica Set (Encrypted TLS connection)
 - 📈 **Prometheus Server:** `http://<YOUR_AWS_EC2_IP>:9090` (Scrapes `/metrics` across AWS instance)
@@ -458,11 +458,11 @@ curl http://localhost:5000/api/health
 
 - **Pause EC2 Instance** (Stops hourly compute while preserving the 20GB root volume):
   ```bash
-  aws ec2 stop-instances --instance-ids i-06a67a3041f734369
+  aws ec2 stop-instances --instance-ids i-0a1c62bc8397f2038
   ```
 - **Resume EC2 Instance** (GitHub Actions auto-discovers the new IP upon push):
   ```bash
-  aws ec2 start-instances --instance-ids i-06a67a3041f734369
+  aws ec2 start-instances --instance-ids i-0a1c62bc8397f2038
   ```
 - **Complete Cloud Teardown** (Terminates all AWS infrastructure in under 45 seconds):
   ```bash
