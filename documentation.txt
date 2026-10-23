@@ -520,7 +520,72 @@ Step 4: Stop Containers
 ```bash
 docker compose --profile monitoring down
 ```
-(Data is safely preserved in `mongo_data` and `uploads_data` volumes).
+(Data is safely preserved in `uploads_data` volume).
+
+--------------------------------------------------------------------------------
+5.2.2. Option 2.2: Local Kubernetes Cluster (Minikube with 5 Replicas)
+--------------------------------------------------------------------------------
+Deploy onto a local single-node Kubernetes cluster featuring 8 total Pods
+(including 5 load-balanced Backend replicas, PVC storage, Prometheus, and Grafana).
+
+Step 1: Start Minikube & Configure Docker Environment
+```powershell
+# Start local Kubernetes control-plane:
+minikube start --driver=docker
+
+# Point your terminal Docker CLI to Minikube's internal registry:
+minikube docker-env | Invoke-Expression
+```
+
+Step 2: Build Container Images Inside Minikube
+```bash
+docker build -t eduvibe-backend:latest ./backend
+docker build -t eduvibe-frontend:latest ./frontend
+```
+
+Step 3: Deploy Kubernetes Manifests & In-Cluster Secrets
+```bash
+# 1. Create dedicated 'eduvibe' isolated namespace:
+kubectl apply -f devops/k8s/namespace.yaml
+
+# 2. Inject environment secrets directly from your root .env file:
+kubectl create secret generic eduvibe-secrets --namespace=eduvibe --from-env-file=".env" --dry-run=client -o yaml | kubectl apply -f -
+
+# 3. Deploy Backend (5 Pod Replicas + PVC), Frontend (Nginx), and Monitoring:
+kubectl apply -f devops/k8s/backend.yaml
+kubectl apply -f devops/k8s/frontend.yaml
+kubectl apply -f devops/k8s/monitoring.yaml
+```
+
+Step 4: Verify Cluster Health & Pods
+```bash
+kubectl get pods -n eduvibe -o wide
+kubectl get deployments -n eduvibe
+```
+(Confirms backend 5/5 READY, frontend 1/1 READY, prometheus 1/1 READY, and grafana 1/1 READY).
+
+Step 5: Access Minikube Endpoints & Port-Forwarding
+- Web Portal (Frontend): `http://localhost:3006`
+  Command: `kubectl port-forward svc/frontend -n eduvibe 3006:80` (or `minikube service frontend -n eduvibe`)
+- Backend API Service: Port 5000 (Internal ClusterIP load-balancing across 5 backend pod replicas)
+- Prometheus Exporter: Port 5000/metrics (Scraped in-cluster by Prometheus pod)
+- Database: MongoDB Atlas Cloud (Injected via Kubernetes Secret `eduvibe-secrets`)
+- Prometheus Server: Port 9090
+- Grafana Dashboard: `http://localhost:3002`
+  Command: `kubectl port-forward svc/grafana -n eduvibe 3002:3000`
+- Kubernetes Web Console: `minikube dashboard`
+
+Step 6: Stop & Cleanup Minikube
+```bash
+# Safely pause the cluster (preserves pods and PVC storage):
+minikube stop
+
+# OR delete the eduvibe namespace completely:
+kubectl delete namespace eduvibe
+
+# Complete wipe (deletes local Minikube cluster VM):
+minikube delete
+```
 
 --------------------------------------------------------------------------------
 5.3. Method 3: Cloud Production Deployment (AWS + Vercel + GitHub Actions)
