@@ -27,3 +27,9 @@ variable "admin_cidr_blocks" {
   type        = list(string)
   default     = ["0.0.0.0/0"]
 }
+
+variable "key_name" {
+  description = "AWS Key Pair name for SSH access (default: webserver)"
+  type        = string
+  default     = "webserver"
+}
