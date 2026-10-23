@@ -52,7 +52,7 @@ usermod -aG docker ubuntu
 # --------------------------------------------------------
 # 4. Clone Application Repository
 # --------------------------------------------------------
-APP_DIR="/home/ubuntu/app"
+APP_DIR="/home/ubuntu/EduVibe-LMS"
 mkdir -p "$APP_DIR"
 
 if [ ! -d "$APP_DIR/.git" ]; then

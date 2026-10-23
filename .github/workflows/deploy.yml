@@ -123,8 +123,8 @@ jobs:
             echo "========================================================="
             echo "🚀 Deploying EduVibe on AWS EC2..."
             echo "========================================================="
-            mkdir -p /home/ubuntu/app
-            cd /home/ubuntu/app
+            mkdir -p /home/ubuntu/EduVibe-LMS
+            cd /home/ubuntu/EduVibe-LMS
 
             # Clone repository if first time, or pull latest updates
             if [ ! -d ".git" ]; then
@@ -134,8 +134,8 @@ jobs:
               git reset --hard origin/main
             fi
 
-            # Rebuild and restart core application containers
-            docker compose up -d --build backend frontend
+            # Rebuild and restart all application containers (including Prometheus & Grafana)
+            docker compose --profile monitoring up -d --build
 
             # Cleanup unused dangling Docker images to preserve disk space
             docker image prune -f
