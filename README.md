@@ -540,7 +540,6 @@ Access to EduVibe is strictly role-based:
 | **Master Administrator** | Configured in `.env` (`ADMIN_EMAIL`) | Configured in `.env` (`ADMIN_PASSWORD`) | Single Master Admin Policy. Approve new faculty accounts, review platform analytics, manage user accounts. |
 | **Academic Faculty** | Registered Faculty Email | User-defined password | Create courses, upload syllabus PDFs and lecture videos, record attendance, build quizzes, grade homework. |
 | **Student** | Registered Student Email | User-defined password | Watch videos, download notes, take quizzes, submit assignments, track attendance percentage. |
-| **Mongo Express GUI** | Configured in `.env` (`MONGO_EXPRESS_USER`) | Configured in `.env` (`MONGO_EXPRESS_PASSWORD`) | Web-based database collection inspection tool *(Docker profile)*. |
 | **Grafana Analytics** | Configured in `.env` (`GRAFANA_ADMIN_USER`) | Configured in `.env` (`GRAFANA_ADMIN_PASSWORD`) | Telemetry dashboards showing server load and request response times. |
 
 ---

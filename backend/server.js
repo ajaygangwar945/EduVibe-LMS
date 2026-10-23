@@ -78,6 +78,16 @@ app.use('/uploads', express.static(uploadsPath, {
   maxAge: '1d',
 }));
 
+// Friendly fallback if someone visits /uploads directly in browser
+app.get(['/uploads', '/uploads/'], (req, res) => {
+  res.json({
+    status: 'active',
+    directory: 'uploads',
+    message: 'Directory listing is disabled for security and student privacy.',
+    usage: 'Files are accessed directly by filename (e.g. /uploads/<filename>)',
+  });
+});
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({

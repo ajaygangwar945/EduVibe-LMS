@@ -93,10 +93,8 @@ Phase 4: Containerization & Local Orchestration
 - Wrote multi-stage `Dockerfile` for the frontend (Vite build + Nginx alpine).
 - Wrote lightweight `Dockerfile` for the backend (Node 18 alpine, non-root user).
 - Created root `docker-compose.yml` linking:
-  * Backend API (Port 5000)
+  * Backend API (Port 5000 - connects to MongoDB Atlas Cloud)
   * React Frontend (Port 3005)
-  * MongoDB 7.0 Engine (Port 27018 internal)
-  * Mongo Express Web GUI (Port 8081)
   * Prometheus Metrics Scraper (Port 9090)
   * Grafana Analytics Dashboard (Port 3001)
 
@@ -173,8 +171,7 @@ Phase 7: CI/CD Pipeline & Kubernetes Manifests
   * `server/models/Quiz.js`: Quizzes, questions, options, and student answers.
   * `server/models/Assignment.js`: Homework prompts and student PDF uploads.
 - Visual Inspection:
-  * MongoDB Compass: Connect to `mongodb://localhost:27017/eduvibe`
-  * Mongo Express (Docker): Open `http://localhost:8081` in browser.
+  * MongoDB Compass: Connect to MongoDB Atlas cluster directly via connection string.
 
 --------------------------------------------------------------------------------
 3.4. Containerization: Docker & Docker Compose
@@ -236,7 +233,7 @@ Phase 7: CI/CD Pipeline & Kubernetes Manifests
    - Role: Sends instant emergency alert emails to administrators.
 8. AWS IAM & Security Groups:
    - Role: Least-privilege IAM roles and firewall rules filtering ports
-     (80, 5000, 8081, 9090, 3001, 22).
+     (80, 5000, 9090, 3001, 22).
 
 --------------------------------------------------------------------------------
 3.7. Global Edge Deployment: Vercel
@@ -503,7 +500,7 @@ Best for running the complete containerized stack in one command.
 Prerequisites:
 - Docker Desktop installed and running.
 
-Step 1: Start Core Application (Frontend + Backend + MongoDB + Mongo Express)
+Step 1: Start Core Application (Frontend + Backend)
 ```bash
 docker compose up -d
 ```
@@ -516,7 +513,6 @@ docker compose --profile monitoring up -d
 Step 3: Access Running Containers
 - React Frontend: `http://localhost:3005`
 - Backend API Health: `http://localhost:5000/api/health`
-- Mongo Express GUI: `http://localhost:8081`
 - Prometheus Server: `http://localhost:9090`
 - Grafana Analytics: `http://localhost:3001`
 
@@ -710,11 +706,6 @@ Role: Student
 - Self-registration on login page.
 - Password: User-defined secure password created during registration
 - Auto-generates official roll number: `STU-2026-XXXX` upon 6-Digit Email OTP verification.
-
-Database GUI (Mongo Express):
-- URL: `http://localhost:8081` (Local Docker Profile)
-- Username: Configured via MONGO_EXPRESS_USER in environment (.env)
-- Password: Configured via MONGO_EXPRESS_PASSWORD in environment (.env)
 
 Analytics Dashboard (Grafana):
 - URL: `http://localhost:3000` (Local) / `http://localhost:3001` (Docker)
