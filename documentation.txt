@@ -605,7 +605,7 @@ Live Verification Script (Run from any terminal):
 Invoke-RestMethod -Uri "https://eduvibe-lms-backend-api.onrender.com/api/health"
 
 # 2. Test live OTP request for password reset (Sends real email via Resend)
-$payload = @{ email = "ajaygangwar945@gmail.com"; purpose = "password_reset" } | ConvertTo-Json
+$payload = @{ email = "user@example.com"; purpose = "password_reset" } | ConvertTo-Json
 Invoke-RestMethod -Uri "https://eduvibe-lms-backend-api.onrender.com/api/auth/send-otp" `
   -Method Post -Body $payload -ContentType "application/json"
 ```
